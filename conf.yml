@@ -10,7 +10,7 @@ repositoryName: "assure-smartapps-claims"
 
 #### Artifactory
 artifactRepository: "assure-generic"
-artifactPath: "/smartapps/assure-smartapps-claims" #i.e: "assure-tools/solution-composer-service/solution-composer/ui/bundle"
+artifactPath: "/smartapps/assure-smartapps-claims/bundle" #i.e: "assure-tools/solution-composer-service/solution-composer/ui/bundle"
 
 ##### Zip (zip)
 targetZipName: "assure-smartapps-claims" #i.e: "solution-composer-ui"
