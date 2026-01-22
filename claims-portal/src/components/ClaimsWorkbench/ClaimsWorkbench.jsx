@@ -11,17 +11,22 @@ import {
   DxcProgressBar,
   DxcAlert
 } from '@dxc-technology/halstack-react';
+import FastTrackBadge from '../shared/FastTrackBadge';
+import DocumentUpload from '../shared/DocumentUpload';
+import DocumentViewer from '../shared/DocumentViewer';
 import './ClaimsWorkbench.css';
 
 const ClaimsWorkbench = ({ claim }) => {
   const [activeTab, setActiveTab] = useState(0);
 
+  console.log('[ClaimsWorkbench] Received claim:', claim);
+
   if (!claim) {
+    console.log('[ClaimsWorkbench] No claim provided, showing alert');
     return (
       <DxcContainer
         padding="var(--spacing-padding-xl)"
-        background={{ color: "var(--color-bg-secondary-lightest)" }}
-        width="100%"
+        style={{ backgroundColor: "var(--color-bg-secondary-lightest)" }}
       >
         <DxcAlert
           type="info"
@@ -31,118 +36,7 @@ const ClaimsWorkbench = ({ claim }) => {
     );
   }
 
-  // Mock financial data
-  const financialData = {
-    totalClaimAmount: 500000,
-    reserves: {
-      initial: 500000,
-      current: 495000,
-      paid: 5000,
-      outstanding: 495000
-    },
-    payments: [
-      {
-        id: 'PMT-001',
-        date: '01/10/2026',
-        payee: 'Jane Smith',
-        type: 'Partial Payment',
-        amount: 5000,
-        status: 'Paid',
-        statusColor: 'success',
-        method: 'ACH',
-        checkNumber: 'ACH-2026-001'
-      }
-    ],
-    pendingPayments: [
-      {
-        id: 'PMT-002',
-        payee: 'Jane Smith',
-        type: 'Final Payment',
-        amount: 300000,
-        status: 'Pending Approval',
-        statusColor: 'warning',
-        scheduledDate: '01/20/2026'
-      },
-      {
-        id: 'PMT-003',
-        payee: 'Michael Smith',
-        type: 'Final Payment',
-        amount: 195000,
-        status: 'Pending Approval',
-        statusColor: 'warning',
-        scheduledDate: '01/20/2026'
-      }
-    ]
-  };
-
-  const policyDetails = {
-    policyNumber: 'POL-2023-456789',
-    insuredName: 'John Smith',
-    policyType: 'Term Life Insurance',
-    coverage: '$500,000',
-    effectiveDate: '03/15/2020',
-    expirationDate: '03/15/2030',
-    premium: '$125/month'
-  };
-
-  const beneficiaries = [
-    {
-      name: 'Jane Smith',
-      relationship: 'Spouse',
-      percentage: '60%',
-      amount: '$300,000',
-      status: 'Verified'
-    },
-    {
-      name: 'Michael Smith',
-      relationship: 'Son',
-      percentage: '40%',
-      amount: '$200,000',
-      status: 'Verified'
-    }
-  ];
-
-  const timelineEvents = [
-    {
-      date: '01/10/2026 2:30 PM',
-      event: 'Partial Payment Issued',
-      user: 'Sarah Johnson',
-      description: 'Expedited payment of $5,000 to cover funeral expenses'
-    },
-    {
-      date: '01/08/2026 9:00 AM',
-      event: 'Assigned to Examiner',
-      user: 'System',
-      description: 'Claim assigned to Sarah Johnson for review'
-    },
-    {
-      date: '01/07/2026 2:45 PM',
-      event: 'Requirements Generated',
-      user: 'Rules Engine',
-      description: '5 requirements generated based on policy type and state regulations'
-    },
-    {
-      date: '01/07/2026 11:15 AM',
-      event: 'Death Verification',
-      user: 'LexisNexis Integration',
-      description: 'Death verified via LexisNexis'
-    },
-    {
-      date: '01/07/2026 10:30 AM',
-      event: 'Claim Received',
-      user: 'System',
-      description: 'Claim automatically received via portal intake'
-    }
-  ];
-
-  const requirements = [
-    { name: 'Death Certificate', status: 'Received', date: '01/07/2026' },
-    { name: 'Beneficiary ID Verification', status: 'Received', date: '01/07/2026' },
-    { name: 'Claim Form', status: 'Received', date: '01/07/2026' },
-    { name: 'Policy Verification', status: 'Completed', date: '01/08/2026' },
-    { name: 'Fraud Check', status: 'Completed', date: '01/09/2026' }
-  ];
-
+  // Helper function - must be declared before use
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -152,28 +46,78 @@ const ClaimsWorkbench = ({ claim }) => {
     }).format(amount);
   };
 
+  // Extract financial data from claim
+  const totalClaimAmount = claim.financial?.claimAmount || claim.financial?.totalClaimed || 0;
+  const payments = claim.financial?.payments || claim.payments || [];
+  const reserves = claim.financial?.reserves || {};
+
+  // Calculate totals
+  const totalPaid = payments
+    .filter(p => p.status === 'PAID' || p.status === 'Paid')
+    .reduce((sum, p) => sum + (p.amount || 0), 0);
+
+  const pendingPayments = payments.filter(p =>
+    p.status === 'PENDING' || p.status === 'Pending Approval' || p.status === 'SCHEDULED'
+  );
+
+  const completedPayments = payments.filter(p =>
+    p.status === 'PAID' || p.status === 'Paid' || p.status === 'COMPLETED'
+  );
+
+  const financialData = {
+    totalClaimAmount,
+    reserves: {
+      initial: reserves.initial || totalClaimAmount,
+      current: reserves.current || (totalClaimAmount - totalPaid),
+      paid: totalPaid,
+      outstanding: reserves.outstanding || (totalClaimAmount - totalPaid)
+    },
+    payments: completedPayments,
+    pendingPayments
+  };
+
+  // Extract policy data from claim
+  const policyDetails = {
+    policyNumber: claim.policy?.policyNumber || 'N/A',
+    insuredName: claim.insured?.name || claim.claimant?.name || 'N/A',
+    policyType: claim.policy?.policyType || 'Term Life Insurance',
+    coverage: claim.financial?.claimAmount ? formatCurrency(claim.financial.claimAmount) : 'N/A',
+    effectiveDate: claim.policy?.effectiveDate || claim.policy?.issueDate || 'N/A',
+    expirationDate: claim.policy?.expirationDate || 'N/A',
+    premium: claim.policy?.premium || 'N/A'
+  };
+
+  // Extract beneficiaries from claim
+  const beneficiaries = claim.beneficiaries || claim.policy?.beneficiaries || [];
+
+  // Extract timeline from claim
+  const timelineEvents = claim.timeline || claim.activityLog || [];
+
+  // Extract requirements from claim
+  const requirements = claim.requirements || [];
+
   return (
     <DxcContainer
       padding="var(--spacing-padding-l)"
-      background={{ color: "var(--color-bg-secondary-lightest)" }}
-      width="100%"
+      style={{ backgroundColor: "var(--color-bg-secondary-lightest)" }}
     >
       <DxcFlex direction="column" gap="var(--spacing-gap-m)">
         {/* Page Header */}
         <DxcFlex justifyContent="space-between" alignItems="flex-start">
           <DxcFlex direction="column" gap="var(--spacing-gap-xs)">
-            <DxcHeading level={1} text={`Claim ${claim.id}`} />
+            <DxcFlex gap="var(--spacing-gap-m)" alignItems="center">
+              <DxcHeading level={1} text={claim.claimNumber || claim.id} />
+              {claim.routing && (
+                <FastTrackBadge routing={claim.routing.type} showLabel={true} size="medium" />
+              )}
+            </DxcFlex>
             <DxcFlex gap="var(--spacing-gap-m)" alignItems="center">
               <DxcTypography fontSize="font-scale-03" fontWeight="font-weight-semibold">
-                {claim.name}
+                {claim.claimant?.name || claim.insured?.name || 'Unknown'}
               </DxcTypography>
-              <DxcBadge
-                label={claim.status}
-                mode="contextual"
-                color={claim.statusColor}
-              />
+              <DxcBadge label={claim.status} />
               <DxcTypography fontSize="12px" color="var(--color-fg-neutral-dark)">
-                {claim.type}
+                {claim.type || 'DEATH'}
               </DxcTypography>
             </DxcFlex>
           </DxcFlex>
@@ -187,40 +131,51 @@ const ClaimsWorkbench = ({ claim }) => {
         {/* Progress Card */}
         <DxcContainer
           padding="var(--spacing-padding-l)"
-          background={{ color: "var(--color-bg-neutral-lightest)" }}
-          borderRadius="var(--border-radius-m)"
-          boxShadow="var(--shadow-mid-02)"
+          style={{ backgroundColor: "var(--color-bg-neutral-lightest)" }}
         >
           <DxcFlex direction="column" gap="var(--spacing-gap-m)">
             <DxcHeading level={3} text="Claim Progress" />
-            <DxcProgressBar
-              label="Overall Completion"
-              value={85}
-              showValue
-            />
+            {requirements.length > 0 && (
+              <DxcProgressBar
+                label="Requirements Complete"
+                value={Math.round((requirements.filter(r => r.status === 'SATISFIED' || r.status === 'Completed').length / requirements.length) * 100)}
+                showValue
+              />
+            )}
             <DxcFlex gap="var(--spacing-gap-xl)">
-              <DxcFlex direction="column" gap="var(--spacing-gap-xxs)">
-                <DxcTypography fontSize="12px" color="var(--color-fg-neutral-stronger)">
-                  SLA DAYS REMAINING
-                </DxcTypography>
-                <DxcTypography fontSize="32px" fontWeight="font-weight-semibold" color="var(--color-fg-success-medium)">
-                  8
-                </DxcTypography>
-              </DxcFlex>
-              <DxcFlex direction="column" gap="var(--spacing-gap-xxs)">
-                <DxcTypography fontSize="12px" color="var(--color-fg-neutral-stronger)">
-                  TARGET CLOSE DATE
-                </DxcTypography>
-                <DxcTypography fontSize="16px" fontWeight="font-weight-semibold">
-                  01/20/2026
-                </DxcTypography>
-              </DxcFlex>
+              {claim.workflow?.sla?.dueDate && (() => {
+                const dueDate = new Date(claim.workflow.sla.dueDate);
+                const today = new Date();
+                const daysRemaining = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                const color = daysRemaining <= 3 ? 'var(--color-fg-error-medium)' : daysRemaining <= 7 ? 'var(--color-fg-warning-medium)' : 'var(--color-fg-success-medium)';
+
+                return (
+                  <>
+                    <DxcFlex direction="column" gap="var(--spacing-gap-xxs)">
+                      <DxcTypography fontSize="12px" color="var(--color-fg-neutral-stronger)">
+                        SLA DAYS REMAINING
+                      </DxcTypography>
+                      <DxcTypography fontSize="32px" fontWeight="font-weight-semibold" color={color}>
+                        {daysRemaining}
+                      </DxcTypography>
+                    </DxcFlex>
+                    <DxcFlex direction="column" gap="var(--spacing-gap-xxs)">
+                      <DxcTypography fontSize="12px" color="var(--color-fg-neutral-stronger)">
+                        TARGET CLOSE DATE
+                      </DxcTypography>
+                      <DxcTypography fontSize="16px" fontWeight="font-weight-semibold">
+                        {dueDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
+                      </DxcTypography>
+                    </DxcFlex>
+                  </>
+                );
+              })()}
               <DxcFlex direction="column" gap="var(--spacing-gap-xxs)">
                 <DxcTypography fontSize="12px" color="var(--color-fg-neutral-stronger)">
                   FASTTRACK ELIGIBLE
                 </DxcTypography>
-                <DxcTypography fontSize="16px" fontWeight="font-weight-semibold" color="var(--color-fg-success-medium)">
-                  Yes
+                <DxcTypography fontSize="16px" fontWeight="font-weight-semibold" color={claim.routing?.type === 'FASTTRACK' ? 'var(--color-fg-success-medium)' : 'var(--color-fg-neutral-dark)'}>
+                  {claim.routing?.type === 'FASTTRACK' ? 'Yes' : 'No'}
                 </DxcTypography>
               </DxcFlex>
             </DxcFlex>
@@ -229,9 +184,7 @@ const ClaimsWorkbench = ({ claim }) => {
 
         {/* Tabs */}
         <DxcContainer
-          background={{ color: "var(--color-bg-neutral-lightest)" }}
-          borderRadius="var(--border-radius-m)"
-          boxShadow="var(--shadow-mid-02)"
+          style={{ backgroundColor: "var(--color-bg-neutral-lightest)" }}
         >
           <DxcFlex direction="column">
             <DxcInset space="var(--spacing-padding-l)" top>
@@ -268,6 +221,14 @@ const ClaimsWorkbench = ({ claim }) => {
                 >
                   <div />
                 </DxcTabs.Tab>
+                <DxcTabs.Tab
+                  label="Documents"
+                  icon="folder"
+                  active={activeTab === 4}
+                  onClick={() => setActiveTab(4)}
+                >
+                  <div />
+                </DxcTabs.Tab>
               </DxcTabs>
             </DxcInset>
 
@@ -279,9 +240,7 @@ const ClaimsWorkbench = ({ claim }) => {
                   <DxcFlex gap="var(--spacing-gap-m)">
                     <DxcContainer
                       padding="var(--spacing-padding-m)"
-                      background={{ color: "var(--color-bg-info-lighter)" }}
-                      borderRadius="var(--border-radius-m)"
-                      grow={1}
+                      style={{ backgroundColor: "var(--color-bg-info-lighter)" }}
                     >
                       <DxcFlex direction="column" gap="var(--spacing-gap-xs)" alignItems="center">
                         <DxcTypography fontSize="12px" fontWeight="font-weight-semibold" color="var(--color-fg-neutral-stronger)">
@@ -294,9 +253,7 @@ const ClaimsWorkbench = ({ claim }) => {
                     </DxcContainer>
                     <DxcContainer
                       padding="var(--spacing-padding-m)"
-                      background={{ color: "var(--color-bg-success-lighter)" }}
-                      borderRadius="var(--border-radius-m)"
-                      grow={1}
+                      style={{ backgroundColor: "var(--color-bg-success-lighter)" }}
                     >
                       <DxcFlex direction="column" gap="var(--spacing-gap-xs)" alignItems="center">
                         <DxcTypography fontSize="12px" fontWeight="font-weight-semibold" color="var(--color-fg-neutral-stronger)">
@@ -309,9 +266,7 @@ const ClaimsWorkbench = ({ claim }) => {
                     </DxcContainer>
                     <DxcContainer
                       padding="var(--spacing-padding-m)"
-                      background={{ color: "var(--color-bg-warning-lighter)" }}
-                      borderRadius="var(--border-radius-m)"
-                      grow={1}
+                      style={{ backgroundColor: "var(--color-bg-warning-lighter)" }}
                     >
                       <DxcFlex direction="column" gap="var(--spacing-gap-xs)" alignItems="center">
                         <DxcTypography fontSize="12px" fontWeight="font-weight-semibold" color="var(--color-fg-neutral-stronger)">
@@ -329,9 +284,8 @@ const ClaimsWorkbench = ({ claim }) => {
                     <DxcHeading level={4} text="Reserve History" />
                     <DxcContainer
                       padding="var(--spacing-padding-m)"
-                      background={{ color: "var(--color-bg-neutral-lighter)" }}
+                      style={{ backgroundColor: "var(--color-bg-neutral-lighter)" }}
                       border={{ color: "var(--border-color-neutral-lighter)", style: "solid", width: "1px" }}
-                      borderRadius="var(--border-radius-m)"
                     >
                       <DxcFlex direction="column" gap="var(--spacing-gap-s)">
                         <DxcFlex justifyContent="space-between">
@@ -364,9 +318,8 @@ const ClaimsWorkbench = ({ claim }) => {
                     {financialData.payments.map((payment, index) => (
                       <DxcContainer
                         key={index}
-                        background={{ color: "var(--color-bg-neutral-lighter)" }}
+                        style={{ backgroundColor: "var(--color-bg-neutral-lighter)" }}
                         border={{ color: "var(--border-color-neutral-lighter)", style: "solid", width: "1px" }}
-                        borderRadius="var(--border-radius-m)"
                       >
                         <DxcInset space="var(--spacing-padding-m)">
                           <DxcFlex direction="column" gap="var(--spacing-gap-s)">
@@ -376,7 +329,7 @@ const ClaimsWorkbench = ({ claim }) => {
                                   {payment.id}
                                 </DxcTypography>
                                 <DxcTypography fontSize="font-scale-03">{payment.payee}</DxcTypography>
-                                <DxcBadge label={payment.status} mode="contextual" color={payment.statusColor} />
+                                <DxcBadge label={payment.status} />
                               </DxcFlex>
                               <DxcTypography fontSize="20px" fontWeight="font-weight-semibold" color="var(--color-fg-success-medium)">
                                 {formatCurrency(payment.amount)}
@@ -415,9 +368,8 @@ const ClaimsWorkbench = ({ claim }) => {
                     {financialData.pendingPayments.map((payment, index) => (
                       <DxcContainer
                         key={index}
-                        background={{ color: "var(--color-bg-warning-lightest)" }}
+                        style={{ backgroundColor: "var(--color-bg-warning-lightest)" }}
                         border={{ color: "var(--border-color-warning-lighter)", style: "solid", width: "1px" }}
-                        borderRadius="var(--border-radius-m)"
                       >
                         <DxcInset space="var(--spacing-padding-m)">
                           <DxcFlex direction="column" gap="var(--spacing-gap-s)">
@@ -427,7 +379,7 @@ const ClaimsWorkbench = ({ claim }) => {
                                   {payment.id}
                                 </DxcTypography>
                                 <DxcTypography fontSize="font-scale-03">{payment.payee}</DxcTypography>
-                                <DxcBadge label={payment.status} mode="contextual" color={payment.statusColor} />
+                                <DxcBadge label={payment.status} />
                               </DxcFlex>
                               <DxcTypography fontSize="20px" fontWeight="font-weight-semibold" color="var(--color-fg-warning-medium)">
                                 {formatCurrency(payment.amount)}
@@ -462,9 +414,8 @@ const ClaimsWorkbench = ({ claim }) => {
                     <DxcHeading level={4} text="Policy Details" />
                     <DxcContainer
                       padding="var(--spacing-padding-m)"
-                      background={{ color: "var(--color-bg-neutral-lighter)" }}
+                      style={{ backgroundColor: "var(--color-bg-neutral-lighter)" }}
                       border={{ color: "var(--border-color-neutral-lighter)", style: "solid", width: "1px" }}
-                      borderRadius="var(--border-radius-m)"
                     >
                       <DxcFlex gap="var(--spacing-gap-xl)" wrap="wrap">
                         <DxcFlex direction="column" gap="var(--spacing-gap-xxs)">
@@ -500,9 +451,8 @@ const ClaimsWorkbench = ({ claim }) => {
                     {beneficiaries.map((ben, index) => (
                       <DxcContainer
                         key={index}
-                        background={{ color: "var(--color-bg-neutral-lighter)" }}
+                        style={{ backgroundColor: "var(--color-bg-neutral-lighter)" }}
                         border={{ color: "var(--border-color-neutral-lighter)", style: "solid", width: "1px" }}
-                        borderRadius="var(--border-radius-m)"
                       >
                         <DxcInset space="var(--spacing-padding-m)">
                           <DxcFlex justifyContent="space-between" alignItems="center">
@@ -523,7 +473,7 @@ const ClaimsWorkbench = ({ claim }) => {
                                 <DxcTypography fontSize="12px" color="var(--color-fg-neutral-dark)">Amount</DxcTypography>
                                 <DxcTypography fontSize="20px" fontWeight="font-weight-semibold" color="var(--color-fg-success-medium)">{ben.amount}</DxcTypography>
                               </DxcFlex>
-                              <DxcBadge label={ben.status} mode="contextual" color="success" />
+                              <DxcBadge label={ben.status} />
                             </DxcFlex>
                           </DxcFlex>
                         </DxcInset>
@@ -536,33 +486,51 @@ const ClaimsWorkbench = ({ claim }) => {
               {/* Timeline Tab */}
               {activeTab === 2 && (
                 <DxcFlex direction="column" gap="var(--spacing-gap-m)">
-                  {timelineEvents.map((event, index) => (
-                    <DxcContainer
-                      key={index}
-                      background={{ color: "var(--color-bg-neutral-lighter)" }}
-                      border={{ color: "var(--border-color-neutral-lighter)", style: "solid", width: "1px" }}
-                      borderRadius="var(--border-radius-m)"
-                    >
-                      <DxcInset space="var(--spacing-padding-m)">
-                        <DxcFlex direction="column" gap="var(--spacing-gap-xs)">
-                          <DxcFlex gap="var(--spacing-gap-m)" alignItems="center">
-                            <DxcTypography fontSize="font-scale-03" fontWeight="font-weight-semibold">
-                              {event.event}
-                            </DxcTypography>
-                            <DxcTypography fontSize="12px" color="var(--color-fg-neutral-dark)">
-                              {event.date}
+                  {timelineEvents.length > 0 ? (
+                    timelineEvents.map((event, index) => (
+                      <DxcContainer
+                        key={index}
+                        style={{ backgroundColor: "var(--color-bg-neutral-lighter)" }}
+                        border={{ color: "var(--border-color-neutral-lighter)", style: "solid", width: "1px" }}
+                      >
+                        <DxcInset space="var(--spacing-padding-m)">
+                          <DxcFlex direction="column" gap="var(--spacing-gap-xs)">
+                            <DxcFlex gap="var(--spacing-gap-m)" alignItems="center">
+                              <DxcTypography fontSize="font-scale-03" fontWeight="font-weight-semibold">
+                                {event.type || 'Event'}
+                              </DxcTypography>
+                              <DxcTypography fontSize="12px" color="var(--color-fg-neutral-dark)">
+                                {event.timestamp ? new Date(event.timestamp).toLocaleString('en-US', {
+                                  month: '2-digit',
+                                  day: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                }) : 'N/A'}
+                              </DxcTypography>
+                            </DxcFlex>
+                            {event.user?.name && (
+                              <DxcTypography fontSize="12px" color="var(--color-fg-neutral-dark)">
+                                by {event.user.name}
+                              </DxcTypography>
+                            )}
+                            <DxcTypography fontSize="font-scale-03">
+                              {event.description || 'No description'}
                             </DxcTypography>
                           </DxcFlex>
-                          <DxcTypography fontSize="12px" color="var(--color-fg-neutral-dark)">
-                            by {event.user}
-                          </DxcTypography>
-                          <DxcTypography fontSize="font-scale-03">
-                            {event.description}
-                          </DxcTypography>
-                        </DxcFlex>
-                      </DxcInset>
+                        </DxcInset>
+                      </DxcContainer>
+                    ))
+                  ) : (
+                    <DxcContainer
+                      padding="var(--spacing-padding-l)"
+                      style={{ backgroundColor: "var(--color-bg-neutral-lighter)" }}
+                    >
+                      <DxcTypography fontSize="font-scale-02" color="var(--color-fg-neutral-dark)">
+                        No timeline events available for this claim.
+                      </DxcTypography>
                     </DxcContainer>
-                  ))}
+                  )}
                 </DxcFlex>
               )}
 
@@ -572,9 +540,8 @@ const ClaimsWorkbench = ({ claim }) => {
                   {requirements.map((req, index) => (
                     <DxcContainer
                       key={index}
-                      background={{ color: "var(--color-bg-neutral-lighter)" }}
+                      style={{ backgroundColor: "var(--color-bg-neutral-lighter)" }}
                       border={{ color: "var(--border-color-neutral-lighter)", style: "solid", width: "1px" }}
-                      borderRadius="var(--border-radius-m)"
                     >
                       <DxcInset space="var(--spacing-padding-m)">
                         <DxcFlex justifyContent="space-between" alignItems="center">
@@ -582,7 +549,7 @@ const ClaimsWorkbench = ({ claim }) => {
                             <DxcTypography fontSize="font-scale-03" fontWeight="font-weight-semibold">
                               {req.name}
                             </DxcTypography>
-                            <DxcBadge label={req.status} mode="contextual" color="success" />
+                            <DxcBadge label={req.status} />
                           </DxcFlex>
                           <DxcFlex gap="var(--spacing-gap-m)" alignItems="center">
                             <DxcTypography fontSize="12px" color="var(--color-fg-neutral-dark)">
@@ -594,6 +561,44 @@ const ClaimsWorkbench = ({ claim }) => {
                       </DxcInset>
                     </DxcContainer>
                   ))}
+                </DxcFlex>
+              )}
+
+              {/* Documents Tab */}
+              {activeTab === 4 && (
+                <DxcFlex direction="column" gap="var(--spacing-gap-l)">
+                  {/* Upload Section */}
+                  <DxcFlex direction="column" gap="var(--spacing-gap-m)">
+                    <DxcHeading level={3} text="Upload Documents" />
+                    <DocumentUpload
+                      claimId={claim.id}
+                      onUploadComplete={(result) => {
+                        console.log('Upload complete:', result);
+                        // TODO: Refresh documents list
+                      }}
+                      acceptedFileTypes={['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx']}
+                      maxFileSize={10 * 1024 * 1024}
+                      multiple={true}
+                    />
+                  </DxcFlex>
+
+                  {/* Documents List */}
+                  <DxcFlex direction="column" gap="var(--spacing-gap-m)">
+                    <DxcHeading level={3} text="Uploaded Documents" />
+                    <DocumentViewer
+                      documents={claim.documents || []}
+                      onDocumentClick={(doc) => {
+                        console.log('Document clicked:', doc);
+                        // TODO: Open document preview modal
+                      }}
+                      onDownload={(doc) => {
+                        console.log('Download document:', doc);
+                        // TODO: Implement download
+                      }}
+                      showIDP={true}
+                      showActions={true}
+                    />
+                  </DxcFlex>
                 </DxcFlex>
               )}
             </DxcInset>

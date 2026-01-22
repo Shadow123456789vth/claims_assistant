@@ -8,3 +8,4 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
+// Version 3.0.0 - Fixed ALL DxcContainer unsupported props

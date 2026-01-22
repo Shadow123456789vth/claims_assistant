@@ -15,6 +15,7 @@ import {
   DxcProgressBar,
   DxcInset
 } from '@dxc-technology/halstack-react';
+import serviceNowService from '../../services/api/serviceNowService';
 import './IntakeForms.css';
 
 const IntakeForms = () => {
@@ -32,6 +33,9 @@ const IntakeForms = () => {
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [fnolNumber, setFnolNumber] = useState(null);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -48,23 +52,73 @@ const IntakeForms = () => {
     setStep(prev => Math.max(prev - 1, 1));
   };
 
-  const handleSubmit = () => {
-    setShowSuccess(true);
-    setTimeout(() => {
-      setShowSuccess(false);
-      setStep(1);
-      setFormData({
-        claimType: '',
-        policyNumber: '',
-        insuredName: '',
-        dateOfDeath: '',
-        claimantName: '',
-        claimantEmail: '',
-        claimantPhone: '',
-        relationship: '',
-        description: ''
-      });
-    }, 3000);
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      // Map form data to ServiceNow FNOL structure
+      const fnolData = {
+        shortDescription: `Death Claim - ${formData.insuredName}`,
+        description: formData.description,
+
+        // Insured Information
+        insured: {
+          fullName: formData.insuredName,
+          dateOfDeath: formData.dateOfDeath
+        },
+
+        // Claimant Information
+        claimant: {
+          fullName: formData.claimantName,
+          emailAddress: formData.claimantEmail,
+          phoneNumber: formData.claimantPhone,
+          relationshipToInsured: formData.relationship
+        },
+
+        // Policy Information
+        policyNumbers: formData.policyNumber,
+
+        // Priority/Category
+        priority: '3', // Medium
+        urgency: '3', // Medium
+        impact: '3' // Medium
+      };
+
+      // Submit to ServiceNow
+      console.log('[IntakeForms] Submitting FNOL to ServiceNow:', fnolData);
+      const result = await serviceNowService.createFNOL(fnolData);
+
+      console.log('[IntakeForms] FNOL created successfully:', result);
+
+      // Show success message with FNOL number
+      setFnolNumber(result.fnolNumber);
+      setShowSuccess(true);
+
+      // Stay on step 3 to show success message
+      // Reset form after 8 seconds
+      setTimeout(() => {
+        setShowSuccess(false);
+        setFnolNumber(null);
+        setStep(1);
+        setFormData({
+          claimType: '',
+          policyNumber: '',
+          insuredName: '',
+          dateOfDeath: '',
+          claimantName: '',
+          claimantEmail: '',
+          claimantPhone: '',
+          relationship: '',
+          description: ''
+        });
+      }, 8000);
+    } catch (err) {
+      console.error('[IntakeForms] Error submitting FNOL:', err);
+      setError(err.message || 'Failed to submit claim. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const progress = (step / 3) * 100;
@@ -72,8 +126,7 @@ const IntakeForms = () => {
   return (
     <DxcContainer
       padding="var(--spacing-padding-xl)"
-      background={{ color: "var(--color-bg-secondary-lightest)" }}
-      width="100%"
+      style={{ backgroundColor: "var(--color-bg-secondary-lightest)" }}
     >
       <DxcFlex direction="column" gap="var(--spacing-gap-l)">
         {/* Page Header */}
@@ -85,19 +138,26 @@ const IntakeForms = () => {
         </DxcFlex>
 
         {/* Success Alert */}
-        {showSuccess && (
+        {showSuccess && fnolNumber && (
           <DxcAlert
             type="success"
-            inlineText="Claim submitted successfully! Your claim number is 1000213."
+            inlineText={`Claim submitted successfully to ServiceNow! Your FNOL number is ${fnolNumber}.`}
+          />
+        )}
+
+        {/* Error Alert */}
+        {error && (
+          <DxcAlert
+            type="error"
+            inlineText={error}
+            onClose={() => setError(null)}
           />
         )}
 
         {/* Main Form Container */}
         <DxcContainer
           padding="var(--spacing-padding-xl)"
-          background={{ color: "var(--color-bg-neutral-lightest)" }}
-          borderRadius="var(--border-radius-m)"
-          boxShadow="var(--shadow-mid-02)"
+          style={{ backgroundColor: "var(--color-bg-neutral-lightest)" }}
         >
           <DxcFlex direction="column" gap="var(--spacing-gap-l)">
             {/* Progress Bar */}
@@ -268,9 +328,10 @@ const IntakeForms = () => {
                   />
                 ) : (
                   <DxcButton
-                    label="Submit Claim"
+                    label={submitting ? "Submitting to ServiceNow..." : "Submit Claim"}
                     mode="primary"
                     onClick={handleSubmit}
+                    disabled={submitting}
                   />
                 )}
               </DxcFlex>
@@ -281,9 +342,7 @@ const IntakeForms = () => {
         {/* What Happens Next Section */}
         <DxcContainer
           padding="var(--spacing-padding-xl)"
-          background={{ color: "var(--color-bg-neutral-lightest)" }}
-          borderRadius="var(--border-radius-m)"
-          boxShadow="var(--shadow-mid-02)"
+          style={{ backgroundColor: "var(--color-bg-neutral-lightest)" }}
         >
           <DxcFlex direction="column" gap="var(--spacing-gap-m)">
             <DxcHeading level={3} text="What happens next?" />

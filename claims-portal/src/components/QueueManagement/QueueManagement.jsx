@@ -16,28 +16,28 @@ const QueueManagement = () => {
       title: 'MY QUEUE',
       value: '8',
       subtitle: '2 high priority',
-      color: '#0095FF',
+      color: 'var(--color-blue-700)',
       icon: '👤'
     },
     {
       title: 'TEAM QUEUE',
       value: '23',
       subtitle: '5 unassigned',
-      color: '#24A148',
+      color: 'var(--color-green-700)',
       icon: '👥'
     },
     {
       title: 'SLA AT RISK',
       value: '5',
       subtitle: 'Requires attention',
-      color: '#D0021B',
+      color: 'var(--color-red-700)',
       icon: '⚠️'
     },
     {
       title: 'FASTTRACK READY',
       value: '12',
       subtitle: 'Auto-approve eligible',
-      color: '#24A148',
+      color: 'var(--color-green-700)',
       icon: '⚡'
     }
   ];
@@ -103,13 +103,13 @@ const QueueManagement = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Pending Review':
-        return '#FF6B00';
+        return 'var(--color-orange-700)';
       case 'In Review':
-        return '#0095FF';
+        return 'var(--color-blue-700)';
       case 'FastTrack Eligible':
-        return '#24A148';
+        return 'var(--color-green-700)';
       case 'Pending Requirements':
-        return '#D0021B';
+        return 'var(--color-red-700)';
       default:
         return '#666';
     }
@@ -118,11 +118,11 @@ const QueueManagement = () => {
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'High':
-        return '#D0021B';
+        return 'var(--color-red-700)';
       case 'Medium':
-        return '#FF6B00';
+        return 'var(--color-orange-700)';
       case 'Low':
-        return '#24A148';
+        return 'var(--color-green-700)';
       default:
         return '#666';
     }

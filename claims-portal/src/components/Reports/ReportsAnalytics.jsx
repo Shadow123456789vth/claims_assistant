@@ -7,7 +7,7 @@ const ReportsAnalytics = () => {
       value: '1,247',
       change: '+15% vs 2025',
       changePositive: true,
-      color: '#0095FF',
+      color: 'var(--color-blue-700)',
       icon: '📊'
     },
     {
@@ -15,7 +15,7 @@ const ReportsAnalytics = () => {
       value: '$24.8M',
       change: '+12% vs 2025',
       changePositive: true,
-      color: '#24A148',
+      color: 'var(--color-green-700)',
       icon: '💵'
     },
     {
@@ -23,7 +23,7 @@ const ReportsAnalytics = () => {
       value: '15 days',
       change: '-25% vs target',
       changePositive: true,
-      color: '#0095FF',
+      color: 'var(--color-blue-700)',
       icon: '⚡'
     },
     {
@@ -31,16 +31,16 @@ const ReportsAnalytics = () => {
       value: '87%',
       change: '+3% vs 2025',
       changePositive: true,
-      color: '#24A148',
+      color: 'var(--color-green-700)',
       icon: '✓'
     }
   ];
 
   const claimsByType = [
-    { type: 'Death Claim', count: 548, percentage: 44, amount: '$14.2M', color: '#0095FF' },
-    { type: 'Maturity', count: 312, percentage: 25, amount: '$6.8M', color: '#24A148' },
-    { type: 'Surrender', count: 267, percentage: 21, amount: '$2.9M', color: '#FF6B00' },
-    { type: 'Withdrawal', count: 120, percentage: 10, amount: '$900K', color: '#D0021B' }
+    { type: 'Death Claim', count: 548, percentage: 44, amount: '$14.2M', color: 'var(--color-blue-700)' },
+    { type: 'Maturity', count: 312, percentage: 25, amount: '$6.8M', color: 'var(--color-green-700)' },
+    { type: 'Surrender', count: 267, percentage: 21, amount: '$2.9M', color: 'var(--color-orange-700)' },
+    { type: 'Withdrawal', count: 120, percentage: 10, amount: '$900K', color: 'var(--color-red-700)' }
   ];
 
   const claimsByProduct = [
@@ -52,10 +52,10 @@ const ReportsAnalytics = () => {
   ];
 
   const cycleTimeByStatus = [
-    { status: 'Approved', avgDays: 12, count: 1085, color: '#24A148' },
-    { status: 'Pending Review', avgDays: 8, count: 89, color: '#FF6B00' },
-    { status: 'Pending Requirements', avgDays: 22, count: 45, color: '#D0021B' },
-    { status: 'In Review', avgDays: 15, count: 28, color: '#0095FF' }
+    { status: 'Approved', avgDays: 12, count: 1085, color: 'var(--color-green-700)' },
+    { status: 'Pending Review', avgDays: 8, count: 89, color: 'var(--color-orange-700)' },
+    { status: 'Pending Requirements', avgDays: 22, count: 45, color: 'var(--color-red-700)' },
+    { status: 'In Review', avgDays: 15, count: 28, color: 'var(--color-blue-700)' }
   ];
 
   const topExaminers = [
@@ -197,7 +197,7 @@ const ReportsAnalytics = () => {
                         label={`${item.percentage}%`}
                         style={{
                           backgroundColor: '#e8f5e9',
-                          color: '#24A148',
+                          color: 'var(--color-green-700)',
                           fontWeight: 600
                         }}
                       />
@@ -327,7 +327,7 @@ const ReportsAnalytics = () => {
               <button style={{
                 padding: '0.75rem 1.5rem',
                 backgroundColor: '#fff',
-                color: '#0095FF',
+                color: 'var(--color-blue-700)',
                 border: '2px solid #0095FF',
                 borderRadius: '4px',
                 fontSize: '14px',
