@@ -14,7 +14,7 @@ artifactPath: "/smartapps/assure-smartapps-claims/bundle" #i.e: "assure-tools/so
 
 ##### Zip (zip)
 targetZipName: "assure-smartapps-claims" #i.e: "solution-composer-ui"
-zipSourceFolder: ".claims-portal/dist" #i.e: "./build"
+zipSourceFolder: "./claims-portal/dist" #i.e: "./build"
 
 ### Tests
 testCommands:
