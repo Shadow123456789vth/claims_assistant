@@ -113,7 +113,10 @@ class ServiceNowService {
   }
 
   /**
-   * Start OAuth Authorization Code flow - redirects user to ServiceNow login
+   * Start OAuth flow - uses Authorization Code with PKCE-style server exchange,
+   * falling back to token exchange via POST if needed.
+   * For static hosting (no backend), we first try Authorization Code flow.
+   * If CORS blocks the token exchange, the user should add a CORS rule for oauth_token.do.
    */
   startOAuthLogin() {
     if (!this.clientId) {
@@ -132,11 +135,13 @@ class ServiceNowService {
     }).toString();
 
     console.log('[ServiceNow] Redirecting to ServiceNow login...');
+    console.log('[ServiceNow] Redirect URI:', this.redirectUri);
     window.location.href = authUrl;
   }
 
   /**
    * Handle OAuth callback - exchange authorization code for tokens
+   * This runs on page load and checks for an auth code in the URL query params.
    */
   async _handleOAuthCallback() {
     const url = new URL(window.location.href);
@@ -144,6 +149,8 @@ class ServiceNowService {
     const state = url.searchParams.get('state');
 
     if (!code) return;
+
+    console.log('[ServiceNow] OAuth callback detected, code present');
 
     const savedState = sessionStorage.getItem('snow_oauth_state');
     if (state && savedState && state !== savedState) {
@@ -153,12 +160,14 @@ class ServiceNowService {
 
     sessionStorage.removeItem('snow_oauth_state');
 
-    // Clean the URL (remove code/state params)
+    // Clean the URL (remove code/state params) immediately
     url.searchParams.delete('code');
     url.searchParams.delete('state');
     window.history.replaceState({}, '', url.pathname + url.search);
 
     console.log('[ServiceNow] Exchanging authorization code for token...');
+    console.log('[ServiceNow] Token endpoint:', this.oauthURL);
+    console.log('[ServiceNow] Redirect URI for exchange:', this.redirectUri);
 
     try {
       const body = new URLSearchParams({
@@ -189,9 +198,14 @@ class ServiceNowService {
       this._saveToken();
       this._notifyAuthChange();
 
-      console.log('[ServiceNow] OAuth token obtained via authorization code, expires in', data.expires_in, 'seconds');
+      console.log('[ServiceNow] OAuth token obtained successfully, expires in', data.expires_in, 'seconds');
     } catch (error) {
       console.error('[ServiceNow] OAuth callback error:', error);
+      console.error('[ServiceNow] If this is a CORS error, you need to add a CORS rule in ServiceNow for the oauth_token.do endpoint');
+      console.error('[ServiceNow] Or ensure your existing CORS rule domain matches:', window.location.origin);
+
+      // Surface the error to the user via auth change notification
+      this._notifyAuthChange();
     }
   }
 
