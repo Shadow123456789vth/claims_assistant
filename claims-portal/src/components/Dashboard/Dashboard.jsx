@@ -12,6 +12,9 @@ import {
   DxcPaginator,
   DxcInset,
   DxcSpinner,
+  DxcAccordion,
+  DxcChip,
+  DxcSelect,
 } from '@dxc-technology/halstack-react';
 import { useClaims } from '../../contexts/ClaimsContext';
 import { useWorkflow } from '../../contexts/WorkflowContext';
@@ -22,13 +25,19 @@ import serviceNowService from '../../services/api/serviceNowService';
 import './Dashboard.css';
 
 const Dashboard = ({ onClaimSelect }) => {
-  const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [activeTabIndex, setActiveTabIndex] = useState(0); // 0 = All Open, 1 = Closed
+  const [subsetFilter, setSubsetFilter] = useState(null); // Pre-filtered subset
   const [searchValue, setSearchValue] = useState('');
   const [isGridView, setIsGridView] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [snowClaims, setSnowClaims] = useState([]);
   const [snowLoading, setSnowLoading] = useState(false);
   const [snowConnected, setSnowConnected] = useState(serviceNowService.isAuthenticated());
+  // Multi-attribute filters
+  const [typeFilter, setTypeFilter] = useState('');
+  const [productFilter, setProductFilter] = useState('');
+  const [stateFilter, setStateFilter] = useState('');
+  const [amountRangeFilter, setAmountRangeFilter] = useState('');
 
   // Get data from contexts
   const {
@@ -196,22 +205,98 @@ const Dashboard = ({ onClaimSelect }) => {
     };
   }, [allClaims]);
 
-  // Filter claims based on active tab and search
+  // Workflow group counts for department inventory
+  const workflowGroups = useMemo(() => {
+    if (!allClaims) return [];
+    return [
+      { key: 'new_fnol', label: 'New FNOL', count: allClaims.filter(c => c.status === ClaimStatus.NEW || c.status === ClaimStatus.SUBMITTED).length },
+      { key: 'awaiting_requirements', label: 'Awaiting Requirements', count: allClaims.filter(c => c.status === ClaimStatus.PENDING_REQUIREMENTS).length },
+      { key: 'requirement_received', label: 'Requirement Received / Pending Action', count: allClaims.filter(c => c.status === ClaimStatus.REQUIREMENTS_COMPLETE || c.status === ClaimStatus.IN_REVIEW).length },
+      { key: 'manual_followups', label: 'Manual Follow Ups', count: allClaims.filter(c => c.status === ClaimStatus.UNDER_REVIEW).length },
+      { key: 'quality_approval', label: 'Quality Approval', count: allClaims.filter(c => c.status === ClaimStatus.IN_APPROVAL).length },
+      { key: 'exception_approval', label: 'Exception Approval', count: allClaims.filter(c => c.routing?.type === RoutingType.SIU).length },
+      { key: 'pending_actuary', label: 'Pending Actuary', count: allClaims.filter(c => c.status === ClaimStatus.PAYMENT_SCHEDULED).length },
+      { key: 'invalidated', label: 'Invalidated Records', count: allClaims.filter(c => c.status === ClaimStatus.DENIED || c.status === ClaimStatus.SUSPENDED).length },
+    ];
+  }, [allClaims]);
+
+  // Filter claims based on active tab, subset filter, and search
   const filteredClaims = useMemo(() => {
     if (!allClaims) return [];
 
     let filtered = [...allClaims];
 
-    // Filter by tab
-    if (activeTabIndex === 1) {
-      // Life Insurance
-      filtered = filtered.filter(c => c.type === 'death');
-    } else if (activeTabIndex === 2) {
-      // Annuities
-      filtered = filtered.filter(c => c.type === 'annuity');
-    } else if (activeTabIndex === 3) {
-      // FastTrack
-      filtered = filtered.filter(c => c.routing?.type === RoutingType.FASTTRACK);
+    // Filter by main tab: All Open vs Closed
+    if (activeTabIndex === 0) {
+      // All Open Claims
+      filtered = filtered.filter(c =>
+        c.status !== ClaimStatus.CLOSED &&
+        c.status !== ClaimStatus.DENIED
+      );
+    } else if (activeTabIndex === 1) {
+      // Closed Claims
+      filtered = filtered.filter(c =>
+        c.status === ClaimStatus.CLOSED ||
+        c.status === ClaimStatus.DENIED
+      );
+    }
+
+    // Apply subset filter
+    if (subsetFilter) {
+      switch (subsetFilter) {
+        case 'new_fnol':
+          filtered = filtered.filter(c => c.status === ClaimStatus.NEW || c.status === ClaimStatus.SUBMITTED);
+          break;
+        case 'awaiting_requirements':
+          filtered = filtered.filter(c => c.status === ClaimStatus.PENDING_REQUIREMENTS);
+          break;
+        case 'requirement_received':
+          filtered = filtered.filter(c => c.status === ClaimStatus.REQUIREMENTS_COMPLETE || c.status === ClaimStatus.IN_REVIEW);
+          break;
+        case 'manual_followups':
+          filtered = filtered.filter(c => c.status === ClaimStatus.UNDER_REVIEW);
+          break;
+        case 'quality_approval':
+          filtered = filtered.filter(c => c.status === ClaimStatus.IN_APPROVAL);
+          break;
+        case 'exception_approval':
+          filtered = filtered.filter(c => c.routing?.type === RoutingType.SIU);
+          break;
+        case 'pending_actuary':
+          filtered = filtered.filter(c => c.status === ClaimStatus.PAYMENT_SCHEDULED);
+          break;
+        case 'invalidated':
+          filtered = filtered.filter(c => c.status === ClaimStatus.DENIED || c.status === ClaimStatus.SUSPENDED);
+          break;
+      }
+    }
+
+    // Multi-attribute filters
+    if (typeFilter) {
+      filtered = filtered.filter(c => c.type === typeFilter);
+    }
+    if (productFilter) {
+      filtered = filtered.filter(c => {
+        const pType = c.policy?.policyType || '';
+        return pType.toLowerCase().includes(productFilter.toLowerCase());
+      });
+    }
+    if (amountRangeFilter) {
+      const getAmount = (claim) => claim.financial?.claimAmount || claim.financial?.totalClaimed || 0;
+      switch (amountRangeFilter) {
+        case 'under_50k':
+          filtered = filtered.filter(c => getAmount(c) < 50000);
+          break;
+        case '50k_250k':
+          filtered = filtered.filter(c => getAmount(c) >= 50000 && getAmount(c) < 250000);
+          break;
+        case '250k_1m':
+          filtered = filtered.filter(c => getAmount(c) >= 250000 && getAmount(c) < 1000000);
+          break;
+        case 'over_1m':
+          filtered = filtered.filter(c => getAmount(c) >= 1000000);
+          break;
+      }
     }
 
     // Filter by search
@@ -227,7 +312,7 @@ const Dashboard = ({ onClaimSelect }) => {
     }
 
     return filtered;
-  }, [allClaims, activeTabIndex, searchValue]);
+  }, [allClaims, activeTabIndex, subsetFilter, searchValue, typeFilter, productFilter, amountRangeFilter]);
 
   // Paginate claims
   const paginatedClaims = useMemo(() => {
@@ -862,7 +947,77 @@ const Dashboard = ({ onClaimSelect }) => {
           </DxcFlex>
         </div>
 
-        {/* Main Content Card - My Priorities */}
+        {/* Department Inventory */}
+        <div style={{
+          backgroundColor: "var(--color-bg-neutral-lightest)",
+          borderRadius: "var(--border-radius-m)",
+          boxShadow: "var(--shadow-mid-04)",
+          padding: "var(--spacing-padding-m)"
+        }}>
+          <DxcFlex direction="column" gap="var(--spacing-gap-m)">
+            <DxcHeading level={3} text="Department Inventory" />
+            <DxcTypography fontSize="font-scale-03" color="var(--color-fg-neutral-dark)">
+              Inventory organized by workflow group. Click a group to filter the claims list below.
+            </DxcTypography>
+            <DxcFlex gap="var(--spacing-gap-s)" wrap="wrap">
+              {workflowGroups.map(group => (
+                <div
+                  key={group.key}
+                  onClick={() => {
+                    setSubsetFilter(subsetFilter === group.key ? null : group.key);
+                    setActiveTabIndex(0);
+                    setCurrentPage(1);
+                  }}
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: "var(--border-radius-m)",
+                    border: subsetFilter === group.key
+                      ? "2px solid var(--color-fg-secondary-medium)"
+                      : "1px solid var(--border-color-neutral-lighter)",
+                    backgroundColor: subsetFilter === group.key
+                      ? "var(--color-bg-neutral-lighter)"
+                      : "var(--color-bg-neutral-lightest)",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                    minWidth: "140px",
+                    textAlign: "center"
+                  }}
+                >
+                  <DxcFlex direction="column" gap="var(--spacing-gap-xxs)" alignItems="center">
+                    <DxcTypography
+                      fontSize="24px"
+                      fontWeight="font-weight-semibold"
+                      color={group.count > 0 ? "var(--color-fg-secondary-medium)" : "var(--color-fg-neutral-dark)"}
+                    >
+                      {group.count}
+                    </DxcTypography>
+                    <DxcTypography
+                      fontSize="12px"
+                      fontWeight="font-weight-semibold"
+                      color="var(--color-fg-neutral-stronger)"
+                      textAlign="center"
+                    >
+                      {group.label}
+                    </DxcTypography>
+                  </DxcFlex>
+                </div>
+              ))}
+            </DxcFlex>
+            {subsetFilter && (
+              <DxcFlex gap="var(--spacing-gap-s)" alignItems="center">
+                <DxcTypography fontSize="font-scale-03" color="var(--color-fg-neutral-dark)">
+                  Filtering by:
+                </DxcTypography>
+                <DxcChip
+                  label={workflowGroups.find(g => g.key === subsetFilter)?.label || subsetFilter}
+                  onClose={() => setSubsetFilter(null)}
+                />
+              </DxcFlex>
+            )}
+          </DxcFlex>
+        </div>
+
+        {/* Main Content Card - Claims Inventory */}
         <div style={{
           backgroundColor: "var(--color-bg-neutral-lightest)",
           borderRadius: "var(--border-radius-m)",
@@ -870,51 +1025,63 @@ const Dashboard = ({ onClaimSelect }) => {
           padding: "var(--spacing-padding-l)"
         }}>
           <DxcFlex direction="column" gap="var(--spacing-gap-s)">
-            <DxcHeading level={3} text="My Priorities" />
+            <DxcHeading level={3} text="Claims Inventory" />
 
-            {/* Tabs */}
+            {/* Main Tabs: All Open vs Closed */}
             <DxcTabs iconPosition="left">
               <DxcTabs.Tab
-                label="All Claims"
+                label="All Open Claims"
                 icon="assignment"
                 active={activeTabIndex === 0}
-                onClick={() => setActiveTabIndex(0)}
+                onClick={() => { setActiveTabIndex(0); setCurrentPage(1); }}
               >
                 <div />
               </DxcTabs.Tab>
               <DxcTabs.Tab
-                label="Life Insurance"
-                icon="favorite"
+                label="Closed Claims"
+                icon="assignment_turned_in"
                 active={activeTabIndex === 1}
-                onClick={() => setActiveTabIndex(1)}
-              >
-                <div />
-              </DxcTabs.Tab>
-              <DxcTabs.Tab
-                label="Annuities"
-                icon="account_balance"
-                active={activeTabIndex === 2}
-                onClick={() => setActiveTabIndex(2)}
-              >
-                <div />
-              </DxcTabs.Tab>
-              <DxcTabs.Tab
-                label="FastTrack"
-                icon="flash_on"
-                active={activeTabIndex === 3}
-                onClick={() => setActiveTabIndex(3)}
+                onClick={() => { setActiveTabIndex(1); setSubsetFilter(null); setCurrentPage(1); }}
               >
                 <div />
               </DxcTabs.Tab>
             </DxcTabs>
 
-            {/* Toolbar */}
-            <DxcFlex justifyContent="space-between" alignItems="center">
+            {/* Multi-Attribute Filters */}
+            <DxcFlex gap="var(--spacing-gap-s)" wrap="wrap" alignItems="flex-end">
               <DxcTextInput
                 placeholder="Search for Claim, Policy, or Quote Numbers..."
                 value={searchValue}
                 onChange={({ value }) => setSearchValue(value)}
                 size="medium"
+              />
+              <DxcSelect
+                label="Type"
+                placeholder="All Types"
+                value={typeFilter}
+                onChange={({ value }) => { setTypeFilter(value); setCurrentPage(1); }}
+                options={[
+                  { label: 'All Types', value: '' },
+                  { label: 'Death', value: 'death' },
+                  { label: 'Maturity', value: 'maturity' },
+                  { label: 'Surrender', value: 'surrender' },
+                  { label: 'Annuity', value: 'annuity' }
+                ]}
+                size="small"
+              />
+              <DxcSelect
+                label="Amount Range"
+                placeholder="All Amounts"
+                value={amountRangeFilter}
+                onChange={({ value }) => { setAmountRangeFilter(value); setCurrentPage(1); }}
+                options={[
+                  { label: 'All Amounts', value: '' },
+                  { label: 'Under $50K', value: 'under_50k' },
+                  { label: '$50K - $250K', value: '50k_250k' },
+                  { label: '$250K - $1M', value: '250k_1m' },
+                  { label: 'Over $1M', value: 'over_1m' }
+                ]}
+                size="small"
               />
               <DxcFlex gap="var(--spacing-gap-ml)" alignItems="center">
                 <DxcButton

@@ -1,0 +1,54 @@
+.fnol-workspace {
+  padding: 24px;
+  width: 100%;
+  background-color: #f5f5f5;
+}
+
+.fnol-workspace .source-indicator {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fnol-workspace .stage-content {
+  min-height: 400px;
+}
+
+.fnol-workspace .policy-result-row {
+  padding: 16px;
+  border: 1px solid var(--border-color-neutral-lighter);
+  border-radius: var(--border-radius-m);
+  background-color: var(--color-bg-neutral-lightest);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.fnol-workspace .policy-result-row:hover {
+  background-color: var(--color-bg-neutral-lighter);
+}
+
+.fnol-workspace .death-verification-section {
+  border-top: 1px solid var(--border-color-neutral-lighter);
+  padding-top: 16px;
+  margin-top: 16px;
+}
+
+.fnol-workspace .packet-preview {
+  border: 2px dashed var(--border-color-neutral-light);
+  border-radius: var(--border-radius-m);
+  padding: 24px;
+  text-align: center;
+  background-color: var(--color-bg-neutral-lighter);
+}
+
+.fnol-workspace .qr-code-placeholder {
+  width: 150px;
+  height: 150px;
+  border: 2px solid var(--color-fg-neutral-strong);
+  border-radius: var(--border-radius-s);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  background-color: var(--color-bg-neutral-lightest);
+}

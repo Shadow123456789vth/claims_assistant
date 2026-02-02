@@ -1,0 +1,36 @@
+.requirements-received {
+  padding: 24px;
+  width: 100%;
+  background-color: #f5f5f5;
+}
+
+.requirements-received .requirement-item {
+  padding: 16px;
+  border: 1px solid var(--border-color-neutral-lighter);
+  border-radius: var(--border-radius-m);
+  background-color: var(--color-bg-neutral-lightest);
+  transition: box-shadow 0.15s;
+}
+
+.requirements-received .requirement-item:hover {
+  box-shadow: var(--shadow-mid-04);
+}
+
+.requirements-received .requirement-item.urgent {
+  border-left: 4px solid var(--color-fg-error-medium, #D0021B);
+}
+
+.requirements-received .requirement-item.pending {
+  border-left: 4px solid var(--color-fg-warning-medium, #FF6B00);
+}
+
+.requirements-received .requirement-item.received {
+  border-left: 4px solid var(--color-fg-success-medium, #24A148);
+}
+
+.requirements-received .level-section {
+  background-color: var(--color-bg-neutral-lightest);
+  border-radius: var(--border-radius-m);
+  box-shadow: var(--shadow-mid-02);
+  padding: var(--spacing-padding-m);
+}

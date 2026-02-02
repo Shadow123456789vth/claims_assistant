@@ -26,7 +26,9 @@
       "Bash(npx vite)",
       "Bash(netstat:*)",
       "Bash(npm view:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "WebFetch(domain:developer.dxc.com)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

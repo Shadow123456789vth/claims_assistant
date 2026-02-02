@@ -3,6 +3,9 @@ import { DxcApplicationLayout, DxcFlex, DxcTypography, DxcButton } from '@dxc-te
 import Dashboard from './components/Dashboard/Dashboard';
 import ClaimsWorkbench from './components/ClaimsWorkbench/ClaimsWorkbench';
 import IntakeForms from './components/IntakeForms/IntakeForms';
+import FNOLWorkspace from './components/FNOLWorkspace/FNOLWorkspace';
+import PendingClaimsReview from './components/PendingClaimsReview/PendingClaimsReview';
+import RequirementsReceived from './components/RequirementsReceived/RequirementsReceived';
 import ThemeSettings from './components/ThemeSettings/ThemeSettings';
 
 // Context Providers
@@ -48,6 +51,12 @@ function AppContent() {
         return <ClaimsWorkbench claim={selectedClaim} />;
       case 'intake':
         return <IntakeForms />;
+      case 'fnolWorkspace':
+        return <FNOLWorkspace onClaimSelect={handleClaimSelect} />;
+      case 'pendingReview':
+        return <PendingClaimsReview onClaimSelect={handleClaimSelect} />;
+      case 'requirementsReceived':
+        return <RequirementsReceived onClaimSelect={handleClaimSelect} />;
       default:
         return <Dashboard onClaimSelect={handleClaimSelect} />;
     }
@@ -61,16 +70,28 @@ function AppContent() {
       onClick: () => handleNavigationClick('dashboard')
     },
     {
-      label: "My Claims",
-      icon: "assignment",
-      selected: currentView === 'claims',
-      onClick: () => handleNavigationClick('claims')
-    },
-    {
-      label: "New Claim (FNOL)",
+      label: "New Claim FNOL Party Portal",
       icon: "add_circle",
       selected: currentView === 'intake',
       onClick: () => handleNavigationClick('intake')
+    },
+    {
+      label: "New FNOL Workspace",
+      icon: "work",
+      selected: currentView === 'fnolWorkspace',
+      onClick: () => handleNavigationClick('fnolWorkspace')
+    },
+    {
+      label: "Pending Claims Review",
+      icon: "pending_actions",
+      selected: currentView === 'pendingReview',
+      onClick: () => handleNavigationClick('pendingReview')
+    },
+    {
+      label: "Requirements Received",
+      icon: "mail",
+      selected: currentView === 'requirementsReceived',
+      onClick: () => handleNavigationClick('requirementsReceived')
     },
   ];
 

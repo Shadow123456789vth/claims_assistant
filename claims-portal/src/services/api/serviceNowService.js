@@ -27,6 +27,7 @@ class ServiceNowService {
     this.clientId = import.meta.env.VITE_SERVICENOW_CLIENT_ID || '';
     this.clientSecret = import.meta.env.VITE_SERVICENOW_CLIENT_SECRET || '';
     this.useOAuth = !!(this.clientId && this.clientSecret);
+    this.redirectUri = import.meta.env.VITE_OAUTH_REDIRECT_URI || `${window.location.origin}/oauth/callback`;
     this.accessToken = null;
     this.tokenExpiry = null;
     this.refreshToken = null;
@@ -119,15 +120,13 @@ class ServiceNowService {
       return;
     }
 
-    // Build the redirect URI (current origin + /oauth/callback)
-    const redirectUri = `${window.location.origin}/oauth/callback`;
     const state = Math.random().toString(36).substring(2, 15);
     sessionStorage.setItem('snow_oauth_state', state);
 
     const authUrl = `${this.serviceNowURL}/oauth_auth.do?` + new URLSearchParams({
       response_type: 'code',
       client_id: this.clientId,
-      redirect_uri: redirectUri,
+      redirect_uri: this.redirectUri,
       state: state
     }).toString();
 
@@ -161,13 +160,12 @@ class ServiceNowService {
     console.log('[ServiceNow] Exchanging authorization code for token...');
 
     try {
-      const redirectUri = `${window.location.origin}/oauth/callback`;
       const body = new URLSearchParams({
         grant_type: 'authorization_code',
         code: code,
         client_id: this.clientId,
         client_secret: this.clientSecret,
-        redirect_uri: redirectUri
+        redirect_uri: this.redirectUri
       });
 
       const response = await fetch(this.oauthURL, {

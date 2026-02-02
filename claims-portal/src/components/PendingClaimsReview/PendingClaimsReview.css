@@ -1,0 +1,46 @@
+.pending-claims-review {
+  padding: 24px;
+  width: 100%;
+  background-color: #f5f5f5;
+}
+
+.pending-claims-review .claim-card {
+  background-color: var(--color-bg-neutral-lightest);
+  border-radius: var(--border-radius-m);
+  box-shadow: var(--shadow-mid-04);
+  padding: var(--spacing-padding-m);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.pending-claims-review .claim-card:hover {
+  box-shadow: var(--shadow-mid-06);
+}
+
+.pending-claims-review .policy-nested-section {
+  margin-left: 24px;
+  padding-left: 16px;
+  border-left: 3px solid var(--border-color-neutral-lighter);
+}
+
+.pending-claims-review .beneficiary-row {
+  padding: 12px 16px;
+  border: 1px solid var(--border-color-neutral-lighter);
+  border-radius: var(--border-radius-s);
+  background-color: var(--color-bg-neutral-lightest);
+}
+
+.pending-claims-review .benefit-table-container {
+  margin-top: 8px;
+  padding: 8px;
+  background-color: var(--color-bg-neutral-lightest);
+  border-radius: var(--border-radius-s);
+}
+
+.pending-claims-review .hierarchy-indicator {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  color: var(--color-fg-neutral-dark);
+  font-size: 12px;
+}
