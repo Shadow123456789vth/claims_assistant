@@ -813,6 +813,7 @@ const ClaimsWorkbench = ({ claim, onBack }) => {
               {activeTab === 6 && (
                 <BeneficiaryAnalyzer
                   claimId={claim.claimNumber || claim.id}
+                  claim={claim}
                   onApproveBeneficiaries={(beneficiaries) => {
                     console.log('[ClaimsWorkbench] Beneficiaries approved:', beneficiaries);
                     // TODO: Update claim with approved beneficiaries
@@ -961,6 +962,7 @@ const ClaimsWorkbench = ({ claim, onBack }) => {
         <DxcDialog isCloseVisible={false}>
           <BeneficiaryAnalyzer
             claimId={claim.claimNumber || claim.id}
+            claim={claim}
             onApproveBeneficiaries={(beneficiaries) => {
               console.log('Beneficiaries approved:', beneficiaries);
               setShowBeneficiaryAnalyzer(false);

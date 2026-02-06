@@ -151,7 +151,7 @@ const ClaimHeader = ({
             <DxcTypography fontSize="font-scale-01" color="var(--color-fg-neutral-stronger)">
               CLAIM AMOUNT
             </DxcTypography>
-            <DxcTypography fontSize="font-scale-03" fontWeight="font-weight-semibold" color="var(--color-fg-info-medium)">
+            <DxcTypography fontSize="font-scale-03" fontWeight="font-weight-semibold">
               {formatCurrency(claim.financial?.claimAmount)}
             </DxcTypography>
           </DxcFlex>

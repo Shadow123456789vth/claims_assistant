@@ -1131,6 +1131,7 @@ const Dashboard = ({ onClaimSelect }) => {
                   ? new Date(submission.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
                   : submission.submitted;
                 const hasFastTrack = isClaim && submission.routing?.type === RoutingType.FASTTRACK;
+                const isClosed = isClaim && (submission.status === 'CLOSED' || submission.status === 'DENIED' || submission.status === 'APPROVED');
                 const hasSLA = isClaim && submission.workflow?.sla?.dueDate;
 
                 return (
@@ -1214,6 +1215,7 @@ const Dashboard = ({ onClaimSelect }) => {
                               }} />
                               <SLAIndicator
                                 slaDate={submission.workflow.sla.dueDate}
+                                claimStatus={submission.status}
                                 compact={true}
                               />
                             </>
