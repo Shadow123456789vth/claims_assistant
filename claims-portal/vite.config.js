@@ -31,25 +31,15 @@ export default defineConfig(({ mode }) => {
           target: 'https://nextgenbpmnp1.service-now.com',
           changeOrigin: true,
           secure: true,
-          rewrite: path => path.replace(/^\/servicenow-oauth/, '/oauth_token.do'),
-
-          configure: (proxy) => {
-            proxy.on('proxyReq', (proxyReq, req) => {
-              console.log('[OAuth Proxy] Forwarding token request');
-
-              if (req.body) {
-                const bodyData = req.body.toString();
-                console.log('[OAuth Proxy] Body:', bodyData);
-                proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-                proxyReq.write(bodyData);
-              }
+          rewrite: (path) => path.replace(/^\/servicenow-oauth/, '/oauth_token.do'),
+          configure: (proxy, options) => {
+            proxy.on('proxyReq', (proxyReq, req, res) => {
+              console.log('[OAuth Proxy] Token request →', options.target + '/oauth_token.do');
             });
-
-            proxy.on('proxyRes', (proxyRes) => {
-              console.log('[OAuth Proxy] ServiceNow status:', proxyRes.statusCode);
+            proxy.on('proxyRes', (proxyRes, req, res) => {
+              console.log('[OAuth Proxy] Token response:', proxyRes.statusCode);
             });
-
-            proxy.on('error', (err) => {
+            proxy.on('error', (err, req, res) => {
               console.error('[OAuth Proxy] Error:', err.message);
             });
           }
