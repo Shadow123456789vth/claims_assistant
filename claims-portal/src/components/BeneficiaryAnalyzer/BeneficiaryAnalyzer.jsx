@@ -41,7 +41,7 @@ const BeneficiaryAnalyzer = ({ claimId, onApproveBeneficiaries, onCancel }) => {
         relationship: 'Spouse',
         percentage: 50,
         ssn: '***-**-1234',
-        dateOfBirth: '1985-03-15',
+        dateOfBirth: '1958-03-15',
         address: {
           street: '123 Main Street',
           city: 'Springfield',
@@ -139,7 +139,7 @@ const BeneficiaryAnalyzer = ({ claimId, onApproveBeneficiaries, onCancel }) => {
         relationship: 'Spouse',
         percentage: 50,
         ssn: '***-**-1234',
-        dateOfBirth: '1985-03-15',
+        dateOfBirth: '1958-03-15',
         address: {
           street: '123 Main St',
           city: 'Springfield',

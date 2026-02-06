@@ -26,10 +26,10 @@ const randomDate = (start, end) => {
 };
 
 /**
- * Generate random SSN
+ * Generate random SSN (masked except last 4 digits)
  */
 const randomSSN = () => {
-  return `${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 90 + 10)}-${Math.floor(Math.random() * 9000 + 1000)}`;
+  return `***-**-${Math.floor(Math.random() * 9000 + 1000)}`;
 };
 
 /**
@@ -393,8 +393,8 @@ const generateClaim = (index, isFastTrack = false) => {
   const policyNumber = `POL-${Math.floor(Math.random() * 900000 + 100000)}`;
   const claimNumber = `CLM-${String(index).padStart(6, '0')}`;
 
-  // Random claim amount between $100K and $1M
-  const claimAmount = Math.floor(Math.random() * 900000 + 100000);
+  // Random claim amount between $50K and $250K (more realistic for term life)
+  const claimAmount = Math.floor(Math.random() * 200000 + 50000);
 
   // Policy issue date (1-10 years ago)
   const policyIssueDate = randomDate(
@@ -449,7 +449,7 @@ const generateClaim = (index, isFastTrack = false) => {
     deathEvent: {
       dateOfDeath: deathDate.toISOString().split('T')[0],
       mannerOfDeath: mannerOfDeath[Math.floor(Math.random() * mannerOfDeath.length)],
-      causeOfDeath: 'Natural Causes',
+      causeOfDeath: Math.random() > 0.9 ? 'Hurricane-related injuries' : 'Natural Causes',
       deathInUSA: Math.random() > 0.1,
       countryOfDeath: Math.random() > 0.1 ? 'USA' : 'Canada',
       stateOfDeath: states[Math.floor(Math.random() * states.length)],
@@ -537,7 +537,7 @@ const generateClaim = (index, isFastTrack = false) => {
         role: 'Primary Beneficiary',
         source: 'Policy Admin',
         resState: states[Math.floor(Math.random() * states.length)],
-        dateOfBirth: randomDate(new Date(1950, 0, 1), new Date(1990, 11, 31)).toISOString().split('T')[0],
+        dateOfBirth: randomDate(new Date(1945, 0, 1), new Date(1975, 11, 31)).toISOString().split('T')[0],
         ssn: randomSSN(),
         phone: `${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 900 + 100)}-${Math.floor(Math.random() * 9000 + 1000)}`,
         email: `${claimantName.toLowerCase().replace(' ', '.')}@email.com`,
@@ -807,12 +807,28 @@ export const generateDemoFSOCases = (claims) => {
 };
 
 /**
+ * Cached demo dataset for consistency across navigation
+ */
+let cachedDemoData = null;
+
+/**
+ * Get or generate demo dataset (cached for consistency)
+ */
+export const getDemoData = () => {
+  if (!cachedDemoData) {
+    const demoClaims = generateDemoClaims(20, true); // Use seeded random
+    cachedDemoData = {
+      claims: demoClaims,
+      policies: generateDemoPolicies(demoClaims),
+      fsoCases: generateDemoFSOCases(demoClaims)
+    };
+  }
+  return cachedDemoData;
+};
+
+/**
  * Export default demo dataset
  */
-const demoClaims = generateDemoClaims(20);
+const demoDataInstance = getDemoData();
 
-export default {
-  claims: demoClaims,
-  policies: generateDemoPolicies(demoClaims),
-  fsoCases: generateDemoFSOCases(demoClaims)
-};
+export default demoDataInstance;

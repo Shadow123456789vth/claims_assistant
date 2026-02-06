@@ -31,7 +31,7 @@ import RequirementsEngine from '../RequirementsEngine/RequirementsEngine';
 import WorkNotes from '../WorkNotes/WorkNotes';
 import './ClaimsWorkbench.css';
 
-const ClaimsWorkbench = ({ claim }) => {
+const ClaimsWorkbench = ({ claim, onBack }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [showBeneficiaryAnalyzer, setShowBeneficiaryAnalyzer] = useState(false);
 
@@ -135,7 +135,7 @@ const ClaimsWorkbench = ({ claim }) => {
           onApprove={() => console.log('Approve claim')}
           onDeny={() => console.log('Deny claim')}
           onAssign={() => console.log('Assign claim')}
-          onBack={() => window.history.back()}
+          onBack={onBack || (() => window.history.back())}
         />
 
         {/* Main Content Area */}

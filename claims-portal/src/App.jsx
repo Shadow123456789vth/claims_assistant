@@ -48,7 +48,7 @@ function AppContent() {
       case 'dashboard':
         return <Dashboard onClaimSelect={handleClaimSelect} />;
       case 'workbench':
-        return <ClaimsWorkbench claim={selectedClaim} />;
+        return <ClaimsWorkbench claim={selectedClaim} onBack={() => handleNavigationClick('dashboard')} />;
       case 'intake':
         return <IntakeForms />;
       case 'fnolWorkspace':

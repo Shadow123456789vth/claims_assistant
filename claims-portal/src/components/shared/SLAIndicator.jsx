@@ -104,7 +104,7 @@ const SLAIndicator = ({
             fontWeight="600"
             color={getColor()}
           >
-            {status === 'breached' && 'SLA Breached'}
+            {status === 'breached' && 'Delayed'}
             {status === 'critical' && 'SLA Critical'}
             {status === 'at-risk' && 'SLA At Risk'}
             {status === 'on-track' && 'On Track'}

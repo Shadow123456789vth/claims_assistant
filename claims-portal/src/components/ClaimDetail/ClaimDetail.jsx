@@ -109,7 +109,7 @@ const ClaimHeader = ({ claim }) => {
             <DxcTypography fontSize="12px" color="var(--color-fg-neutral-dark)">
               CLAIM AMOUNT
             </DxcTypography>
-            <DxcTypography fontSize="font-scale-03" fontWeight="font-weight-semibold" color="var(--color-fg-secondary-medium)">
+            <DxcTypography fontSize="font-scale-03" fontWeight="font-weight-semibold">
               ${(claim.financial?.claimAmount || 0).toLocaleString()}
             </DxcTypography>
           </DxcFlex>
@@ -222,7 +222,7 @@ const PolicyInformation = ({ claim, policy }) => {
             <DxcTypography fontSize="12px" color="var(--color-fg-neutral-dark)">
               COVERAGE AMOUNT
             </DxcTypography>
-            <DxcTypography fontSize="font-scale-03" fontWeight="font-weight-semibold" color="var(--color-fg-secondary-medium)">
+            <DxcTypography fontSize="font-scale-03" fontWeight="font-weight-semibold">
               ${(policyData.coverage?.faceAmount || 0).toLocaleString()}
             </DxcTypography>
           </DxcFlex>
