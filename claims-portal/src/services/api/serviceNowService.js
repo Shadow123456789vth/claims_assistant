@@ -19,7 +19,7 @@ class ServiceNowService {
 
     // Always use proxy endpoints
     this.baseURL = '/servicenow-api';
-    this.oauthURL = '/servicenow-oauth';
+    this.oauthURL = '/api/servicenow-oauth';
 
     this.apiVersion = '/api/now/table';
     this.fnolTable = 'x_dxcis_claims_a_0_claims_fnol';
