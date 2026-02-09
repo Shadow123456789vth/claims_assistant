@@ -9,8 +9,8 @@
       "dest": "/api/$1"
     },
     {
-      "src": "^(?!/api/).*",
-      "dest": "/index.html"
+      "src": "/(.*)",
+      "dest": "/claims-portal/dist/index.html"
     }
   ]
 }
