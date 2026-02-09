@@ -6,7 +6,10 @@
   "routes": [
     {
       "src": "^/api/(.*)",
-      "dest": "/api/$1"
+      "dest": "/claims-portal/api/$1"
+    },
+    {
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
