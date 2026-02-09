@@ -1,7 +1,8 @@
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
 
   if (req.method !== 'POST') {
-    return res.status(405).end();
+    res.statusCode = 405;
+    return res.end('Method Not Allowed');
   }
 
   try {
@@ -19,9 +20,11 @@ export default async function handler(req, res) {
 
     const text = await response.text();
 
-    res.status(response.status).send(text);
+    res.statusCode = response.status;
+    res.end(text);
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.statusCode = 500;
+    res.end(JSON.stringify({ error: err.message }));
   }
-}
+};
