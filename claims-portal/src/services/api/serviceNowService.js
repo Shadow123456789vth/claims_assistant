@@ -121,20 +121,17 @@ class ServiceNowService {
   }
 
   async _handleOAuthCallback() {
-
     const url = new URL(window.location.href);
     const code = url.searchParams.get('code');
     if (!code) return;
-
+  
     console.log('[OAuth] Code received');
-
-    // Clean URL
+  
     url.searchParams.delete('code');
     url.searchParams.delete('state');
     window.history.replaceState({}, '', url.pathname);
-
+  
     try {
-
       const body = new URLSearchParams({
         grant_type: 'authorization_code',
         code,
@@ -142,24 +139,33 @@ class ServiceNowService {
         client_secret: this.clientSecret,
         redirect_uri: this.redirectUri
       });
-
+  
       const res = await fetch(this.oauthURL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body
       });
-
+  
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`OAuth endpoint returned ${res.status}: ${errorText}`);
+      }
+  
       const data = await res.json();
-
+  
+      if (!data.access_token) {
+        throw new Error('No access_token in response: ' + JSON.stringify(data));
+      }
+  
       this.accessToken = data.access_token;
       this.refreshToken = data.refresh_token;
       this.tokenExpiry = Date.now() + (data.expires_in * 1000);
-
+  
       this._saveToken();
       this._notify();
-
+  
       console.log('[OAuth] Token OK');
-
+  
     } catch (e) {
       console.error('[OAuth] Exchange Failed', e);
     }
