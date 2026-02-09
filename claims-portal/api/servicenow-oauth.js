@@ -4,11 +4,9 @@ export const config = {
 
 export default async function handler(req, res) {
 
-  // DEBUG log (visible in Vercel logs)
-  console.log("METHOD:", req.method);
-  console.log("BODY:", req.body);
+  console.log("Incoming method:", req.method);
 
-  // Allow both POST and OPTIONS
+  // Allow preflight
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -16,19 +14,12 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({
-      error: 'Method Not Allowed',
-      received: req.method
-    });
-  }
-
   try {
 
-    // Convert body to urlencoded string
-    const params = new URLSearchParams(req.body);
+    // Accept body safely
+    const params = new URLSearchParams(req.body || {});
 
-    const snResponse = await fetch(
+    const sn = await fetch(
       'https://nextgenbpmnp1.service-now.com/oauth_token.do',
       {
         method: 'POST',
@@ -39,11 +30,13 @@ export default async function handler(req, res) {
       }
     );
 
-    const text = await snResponse.text();
+    const text = await sn.text();
 
-    return res.status(snResponse.status).send(text);
+    return res.status(sn.status).send(text);
 
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({
+      error: err.message
+    });
   }
 }
