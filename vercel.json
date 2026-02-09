@@ -2,10 +2,15 @@
   "buildCommand": "cd claims-portal && npm run build",
   "outputDirectory": "claims-portal/dist",
   "installCommand": "cd claims-portal && npm install",
-  "rewrites": [
+
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "^/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "^(?!/api/).*",
+      "dest": "/index.html"
     }
   ]
 }
