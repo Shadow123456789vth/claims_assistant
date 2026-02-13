@@ -1,0 +1,340 @@
+/* Bloom Insurance Theme
+ * Brand Colors extracted from Bloom Insurance logo
+ */
+
+:root {
+  /* Primary Brand Colors */
+  --bloom-blue: #0095D5;
+  --bloom-blue-dark: #0077AA;
+  --bloom-blue-light: #33AAE0;
+
+  --bloom-green: #6CB33F;
+  --bloom-green-dark: #5A9933;
+  --bloom-green-light: #89C541;
+
+  --bloom-orange: #F9A826;
+  --bloom-orange-dark: #E89410;
+  --bloom-orange-light: #FFBD4D;
+
+  --bloom-lime: #C8D82D;
+  --bloom-lime-dark: #A8B824;
+  --bloom-lime-light: #D6E350;
+
+  /* Neutral Colors */
+  --bloom-gray: #707070;
+  --bloom-gray-dark: #4A4A4A;
+  --bloom-gray-light: #9E9E9E;
+
+  --bloom-white: #FFFFFF;
+  --bloom-off-white: #F8F9FA;
+  --bloom-light-bg: #F5F7FA;
+
+  /* Semantic Colors */
+  --bloom-success: #6CB33F;
+  --bloom-warning: #F9A826;
+  --bloom-error: #E74C3C;
+  --bloom-info: #0095D5;
+
+  /* Gradients */
+  --bloom-gradient-primary: linear-gradient(135deg, #0095D5 0%, #6CB33F 100%);
+  --bloom-gradient-accent: linear-gradient(135deg, #F9A826 0%, #C8D82D 100%);
+  --bloom-gradient-subtle: linear-gradient(180deg, #F8F9FA 0%, #FFFFFF 100%);
+
+  /* Shadows */
+  --bloom-shadow-sm: 0 1px 3px rgba(0, 149, 213, 0.1);
+  --bloom-shadow-md: 0 4px 6px rgba(0, 149, 213, 0.15);
+  --bloom-shadow-lg: 0 10px 20px rgba(0, 149, 213, 0.2);
+
+  /* Border Radius */
+  --bloom-radius-sm: 4px;
+  --bloom-radius-md: 8px;
+  --bloom-radius-lg: 12px;
+  --bloom-radius-xl: 16px;
+
+  /* Spacing */
+  --bloom-spacing-xs: 4px;
+  --bloom-spacing-sm: 8px;
+  --bloom-spacing-md: 16px;
+  --bloom-spacing-lg: 24px;
+  --bloom-spacing-xl: 32px;
+}
+
+/* Apply theme to body */
+body.bloom-theme {
+  background-color: var(--bloom-light-bg);
+  color: var(--bloom-gray);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+/* Bloom styled buttons */
+.bloom-btn {
+  border-radius: var(--bloom-radius-md);
+  padding: var(--bloom-spacing-sm) var(--bloom-spacing-lg);
+  font-weight: 600;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.bloom-btn-primary {
+  background: var(--bloom-blue);
+  color: white;
+  box-shadow: var(--bloom-shadow-sm);
+}
+
+.bloom-btn-primary:hover {
+  background: var(--bloom-blue-dark);
+  box-shadow: var(--bloom-shadow-md);
+  transform: translateY(-1px);
+}
+
+.bloom-btn-success {
+  background: var(--bloom-green);
+  color: white;
+  box-shadow: var(--bloom-shadow-sm);
+}
+
+.bloom-btn-success:hover {
+  background: var(--bloom-green-dark);
+  box-shadow: var(--bloom-shadow-md);
+  transform: translateY(-1px);
+}
+
+.bloom-btn-warning {
+  background: var(--bloom-orange);
+  color: white;
+  box-shadow: var(--bloom-shadow-sm);
+}
+
+.bloom-btn-warning:hover {
+  background: var(--bloom-orange-dark);
+  box-shadow: var(--bloom-shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Bloom cards */
+.bloom-card {
+  background: white;
+  border-radius: var(--bloom-radius-lg);
+  padding: var(--bloom-spacing-lg);
+  box-shadow: var(--bloom-shadow-sm);
+  transition: all 0.3s;
+}
+
+.bloom-card:hover {
+  box-shadow: var(--bloom-shadow-md);
+  transform: translateY(-2px);
+}
+
+.bloom-card-header {
+  border-bottom: 2px solid var(--bloom-blue);
+  padding-bottom: var(--bloom-spacing-md);
+  margin-bottom: var(--bloom-spacing-lg);
+}
+
+/* Bloom badges */
+.bloom-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--bloom-radius-xl);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bloom-badge-primary {
+  background: var(--bloom-blue-light);
+  color: var(--bloom-blue-dark);
+}
+
+.bloom-badge-success {
+  background: var(--bloom-green-light);
+  color: var(--bloom-green-dark);
+}
+
+.bloom-badge-warning {
+  background: var(--bloom-orange-light);
+  color: var(--bloom-orange-dark);
+}
+
+.bloom-badge-info {
+  background: var(--bloom-blue-light);
+  color: var(--bloom-blue-dark);
+}
+
+/* Bloom status indicators */
+.bloom-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bloom-spacing-xs);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.bloom-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.bloom-status-active .bloom-status-dot {
+  background: var(--bloom-green);
+  box-shadow: 0 0 8px rgba(108, 179, 63, 0.5);
+}
+
+.bloom-status-pending .bloom-status-dot {
+  background: var(--bloom-orange);
+  box-shadow: 0 0 8px rgba(249, 168, 38, 0.5);
+}
+
+.bloom-status-new .bloom-status-dot {
+  background: var(--bloom-blue);
+  box-shadow: 0 0 8px rgba(0, 149, 213, 0.5);
+}
+
+/* Bloom progress indicators */
+.bloom-progress {
+  height: 8px;
+  background: var(--bloom-off-white);
+  border-radius: var(--bloom-radius-xl);
+  overflow: hidden;
+}
+
+.bloom-progress-bar {
+  height: 100%;
+  background: var(--bloom-gradient-primary);
+  border-radius: var(--bloom-radius-xl);
+  transition: width 0.3s ease;
+}
+
+/* Bloom headers */
+.bloom-header {
+  background: white;
+  border-bottom: 1px solid #E5E7EB;
+  box-shadow: var(--bloom-shadow-sm);
+}
+
+.bloom-page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--bloom-gray-dark);
+  margin-bottom: var(--bloom-spacing-sm);
+}
+
+.bloom-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--bloom-blue);
+  margin-bottom: var(--bloom-spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--bloom-spacing-sm);
+}
+
+/* Bloom forms */
+.bloom-input {
+  border: 2px solid #E5E7EB;
+  border-radius: var(--bloom-radius-md);
+  padding: var(--bloom-spacing-sm) var(--bloom-spacing-md);
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.bloom-input:focus {
+  outline: none;
+  border-color: var(--bloom-blue);
+  box-shadow: 0 0 0 3px rgba(0, 149, 213, 0.1);
+}
+
+.bloom-select {
+  border: 2px solid #E5E7EB;
+  border-radius: var(--bloom-radius-md);
+  padding: var(--bloom-spacing-sm) var(--bloom-spacing-md);
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bloom-select:focus {
+  outline: none;
+  border-color: var(--bloom-blue);
+  box-shadow: 0 0 0 3px rgba(0, 149, 213, 0.1);
+}
+
+/* Bloom alerts */
+.bloom-alert {
+  padding: var(--bloom-spacing-md);
+  border-radius: var(--bloom-radius-md);
+  border-left: 4px solid;
+  margin-bottom: var(--bloom-spacing-md);
+}
+
+.bloom-alert-info {
+  background: rgba(0, 149, 213, 0.1);
+  border-color: var(--bloom-blue);
+  color: var(--bloom-blue-dark);
+}
+
+.bloom-alert-success {
+  background: rgba(108, 179, 63, 0.1);
+  border-color: var(--bloom-green);
+  color: var(--bloom-green-dark);
+}
+
+.bloom-alert-warning {
+  background: rgba(249, 168, 38, 0.1);
+  border-color: var(--bloom-orange);
+  color: var(--bloom-orange-dark);
+}
+
+.bloom-alert-error {
+  background: rgba(231, 76, 60, 0.1);
+  border-color: var(--bloom-error);
+  color: #C0392B;
+}
+
+/* Utility classes */
+.bloom-text-primary { color: var(--bloom-blue); }
+.bloom-text-success { color: var(--bloom-green); }
+.bloom-text-warning { color: var(--bloom-orange); }
+.bloom-text-muted { color: var(--bloom-gray-light); }
+
+.bloom-bg-primary { background: var(--bloom-blue); }
+.bloom-bg-success { background: var(--bloom-green); }
+.bloom-bg-warning { background: var(--bloom-orange); }
+.bloom-bg-light { background: var(--bloom-light-bg); }
+
+/* Animations */
+@keyframes bloom-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bloom-fade-in {
+  animation: bloom-fade-in 0.3s ease-out;
+}
+
+@keyframes bloom-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.bloom-slide-in {
+  animation: bloom-slide-in 0.4s ease-out;
+}

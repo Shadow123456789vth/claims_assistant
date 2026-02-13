@@ -98,14 +98,14 @@ const Sidebar = ({ currentView, onNavigationClick, collapsed = false, onToggleCo
           {!isCollapsed && (
             <>
               <div className="brand-icon">
-                <span className="material-icons">local_florist</span>
+                <img src="/Bloom_logo.jpg" alt="Bloom Insurance" />
               </div>
-              <span className="brand-text">Claims Portal</span>
+              <span className="brand-text">Bloom Claims</span>
             </>
           )}
           {isCollapsed && (
             <div className="brand-icon-collapsed">
-              <span className="material-icons">local_florist</span>
+              <img src="/Bloom_logo.jpg" alt="Bloom Insurance" />
             </div>
           )}
         </div>

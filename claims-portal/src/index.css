@@ -28,6 +28,12 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #F5F7FA;
+}
+
+/* Apply Bloom theme */
+body.bloom-theme {
+  background-color: #F5F7FA;
 }
 
 h1 {
@@ -56,11 +62,11 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: #707070;
+    background-color: #F5F7FA;
   }
   a:hover {
-    color: #747bff;
+    color: #0095D5;
   }
   button {
     background-color: #f9f9f9;
