@@ -101,34 +101,11 @@ function AppContent() {
       header={
         <DxcApplicationLayout.Header
           appTitle={
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <button
-                onClick={() => setSidenavExpanded(!sidenavExpanded)}
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  padding: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '4px',
-                  transition: 'background 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.05)'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                title={sidenavExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-              >
-                <span className="material-icons" style={{ fontSize: '24px', color: '#1B75BB' }}>
-                  menu
-                </span>
-              </button>
-              <img
-                src="/Bloom_logo.jpg"
-                alt="Bloom Insurance"
-                style={{ height: '32px', width: 'auto' }}
-              />
-            </div>
+            <img
+              src="/Bloom_logo.jpg"
+              alt="Bloom Insurance"
+              style={{ height: '32px', width: 'auto' }}
+            />
           }
           sideContent={(isResponsive) =>
             isResponsive ? null : (

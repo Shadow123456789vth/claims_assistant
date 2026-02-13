@@ -109,6 +109,15 @@ const Sidebar = ({ currentView, onNavigationClick, collapsed = false, onToggleCo
             </div>
           )}
         </div>
+        <button
+          className="collapse-toggle"
+          onClick={handleToggle}
+          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <span className="material-icons">
+            {isCollapsed ? 'menu' : 'menu_open'}
+          </span>
+        </button>
       </div>
 
       {/* Navigation Groups */}
