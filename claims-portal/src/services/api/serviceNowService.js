@@ -14,9 +14,12 @@ class ServiceNowService {
     const isDevelopment = import.meta.env.DEV;
     this.isDevelopment = isDevelopment;
     this.serviceNowURL = import.meta.env.VITE_SERVICENOW_URL || 'https://nextgenbpmnp1.service-now.com';
-    this.baseURL = isDevelopment
-      ? '/servicenow-api'  // Vite proxy path
-      : this.serviceNowURL;
+
+    // ALWAYS use backend API proxy to avoid CORS issues
+    this.useProxy = true; // Always use proxy for both dev and prod
+    this.proxyURL = isDevelopment
+      ? '/servicenow-api'  // Vite proxy in development
+      : '/api/servicenow-api';  // Vercel API in production
 
     // ALWAYS use backend API for OAuth to avoid CORS issues
     this.oauthURL = isDevelopment
@@ -44,7 +47,7 @@ class ServiceNowService {
     // Check for OAuth callback code in URL
     this._handleOAuthCallback();
 
-    console.log('[ServiceNow] Base URL:', this.baseURL, '(Development mode:', isDevelopment, ')');
+    console.log('[ServiceNow] Proxy URL:', this.proxyURL, '(Development mode:', isDevelopment, ')');
     console.log('[ServiceNow] Auth mode:', this.useOAuth ? 'OAuth (Authorization Code)' : 'Basic Auth');
     console.log('[ServiceNow] Authenticated:', this.isAuthenticated());
   }
@@ -70,6 +73,20 @@ class ServiceNowService {
   isAuthenticated() {
     if (!this.useOAuth) return true; // Basic auth is always "authenticated"
     return !!(this.accessToken && this.tokenExpiry && Date.now() < this.tokenExpiry);
+  }
+
+  /**
+   * Build API URL using proxy to avoid CORS
+   * @param {string} path - ServiceNow API path (e.g., '/api/now/table/tablename')
+   * @returns {string} Proxied URL
+   */
+  buildProxyURL(path) {
+    // In production, use Vercel API proxy with path as query parameter
+    if (!this.isDevelopment) {
+      return `${this.proxyURL}?path=${encodeURIComponent(path)}`;
+    }
+    // In development, Vite proxy handles path rewriting
+    return `${this.proxyURL}${path}`;
   }
 
   /**
@@ -417,7 +434,8 @@ class ServiceNowService {
       console.log('[ServiceNow] Mapped data being sent to ServiceNow:', mappedData);
       console.log('[ServiceNow] Mapped data (stringified):', JSON.stringify(mappedData, null, 2));
 
-      const url = `${this.baseURL}${this.apiVersion}/${this.fnolTable}`;
+      const path = `${this.apiVersion}/${this.fnolTable}`;
+      const url = this.buildProxyURL(path);
       console.log('[ServiceNow] Request URL:', url);
 
       const authHeaders = await this.getAuthHeaders();
@@ -471,7 +489,8 @@ class ServiceNowService {
    */
   async getFNOL(sysId) {
     try {
-      const url = `${this.baseURL}${this.apiVersion}/${this.fnolTable}/${sysId}`;
+      const path = `${this.apiVersion}/${this.fnolTable}/${sysId}`;
+      const url = this.buildProxyURL(path);
       const headers = await this.getAuthHeaders();
       const response = await fetch(url, {
         method: 'GET',
@@ -501,7 +520,8 @@ class ServiceNowService {
         sysparm_query: `number=${fnolNumber}`,
         sysparm_limit: '1'
       });
-      const url = `${this.baseURL}${this.apiVersion}/${this.fnolTable}?${params}`;
+      const path = `${this.apiVersion}/${this.fnolTable}?${params}`;
+      const url = this.buildProxyURL(path);
 
       const headers = await this.getAuthHeaders();
       const response = await fetch(url, {
@@ -607,7 +627,8 @@ class ServiceNowService {
         sysparm_query: `element=work_notes^name=${this.fnolTable}^element_id=${sysId}^ORDERBYDESCsys_created_on`,
         sysparm_display_value: 'true'
       });
-      const url = `${this.baseURL}${this.apiVersion}/sys_journal_field?${params}`;
+      const path = `${this.apiVersion}/sys_journal_field?${params}`;
+      const url = this.buildProxyURL(path);
       console.log('[ServiceNow] Fetching work notes for sys_id:', sysId);
 
       const headers = await this.getAuthHeaders();
@@ -637,7 +658,8 @@ class ServiceNowService {
    */
   async addWorkNote(sysId, noteText) {
     try {
-      const url = `${this.baseURL}${this.apiVersion}/${this.fnolTable}/${sysId}`;
+      const path = `${this.apiVersion}/${this.fnolTable}/${sysId}`;
+      const url = this.buildProxyURL(path);
       console.log('[ServiceNow] Adding work note to sys_id:', sysId);
 
       const authHeaders = await this.getAuthHeaders();
@@ -692,12 +714,13 @@ class ServiceNowService {
 
       const params = new URLSearchParams({
         sysparm_query: queryParts.join('^'),
-        sysparm_limit: String(filters.limit || 100),
+        sysparm_limit: String(filters.limit || 50),
         sysparm_offset: String(filters.offset || 0),
         sysparm_display_value: 'true'
       });
 
-      const url = `${this.baseURL}${this.apiVersion}/${this.fnolTable}?${params}`;
+      const path = `${this.apiVersion}/${this.fnolTable}?${params}`;
+      const url = this.buildProxyURL(path);
       console.log('[ServiceNow] Fetching global FNOL records');
 
       const headers = await this.getAuthHeaders();
