@@ -6,6 +6,7 @@ import IntakeForms from './components/IntakeForms/IntakeForms';
 import FNOLWorkspace from './components/FNOLWorkspace/FNOLWorkspace';
 import PendingClaimsReview from './components/PendingClaimsReview/PendingClaimsReview';
 import RequirementsReceived from './components/RequirementsReceived/RequirementsReceived';
+import ClaimsHandlerDashboard from './components/ClaimsHandlerDashboard/ClaimsHandlerDashboard';
 import ThemeSettings from './components/ThemeSettings/ThemeSettings';
 
 // Context Providers
@@ -47,6 +48,8 @@ function AppContent() {
     switch (currentView) {
       case 'dashboard':
         return <Dashboard onClaimSelect={handleClaimSelect} />;
+      case 'handlerDashboard':
+        return <ClaimsHandlerDashboard />;
       case 'workbench':
         return <ClaimsWorkbench claim={selectedClaim} onBack={() => handleNavigationClick('dashboard')} />;
       case 'intake':
@@ -68,6 +71,12 @@ function AppContent() {
       icon: "dashboard",
       selected: currentView === 'dashboard',
       onClick: () => handleNavigationClick('dashboard')
+    },
+    {
+      label: "My Claims Workbench",
+      icon: "assignment_ind",
+      selected: currentView === 'handlerDashboard',
+      onClick: () => handleNavigationClick('handlerDashboard')
     },
     {
       label: "New Claim FNOL Party Portal",
