@@ -2,13 +2,13 @@
 .modern-sidebar {
   width: 280px;
   height: 100%;
-  background: linear-gradient(180deg, #0095D5 0%, #0077AA 100%);
+  background: linear-gradient(180deg, #1B75BB 0%, #00ADEE 100%);
   color: #fff;
   display: flex;
   flex-direction: column;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  box-shadow: 2px 0 12px rgba(0, 149, 213, 0.2);
+  box-shadow: 2px 0 12px rgba(27, 117, 187, 0.2);
   overflow: hidden;
 }
 
@@ -192,8 +192,8 @@
 .nav-item.active {
   background: rgba(255, 255, 255, 0.2);
   color: white;
-  border-left-color: #F9A826;
-  box-shadow: inset 0 0 12px rgba(249, 168, 38, 0.1);
+  border-left-color: #F6921E;
+  box-shadow: inset 0 0 12px rgba(246, 146, 30, 0.1);
 }
 
 .nav-item.active::before {
@@ -204,7 +204,7 @@
   transform: translateY(-50%);
   width: 4px;
   height: 24px;
-  background: linear-gradient(180deg, #F9A826 0%, #6CB33F 100%);
+  background: linear-gradient(180deg, #F6921E 0%, #37A526 100%);
   border-radius: 2px 0 0 2px;
   opacity: 0;
 }
@@ -230,7 +230,7 @@
 }
 
 .nav-badge {
-  background: linear-gradient(135deg, #F9A826 0%, #C8D82D 100%);
+  background: linear-gradient(135deg, #F6921E 0%, #E8DE23 100%);
   color: white;
   font-size: 11px;
   font-weight: 700;
@@ -238,7 +238,7 @@
   border-radius: 12px;
   min-width: 20px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(249, 168, 38, 0.4);
+  box-shadow: 0 2px 8px rgba(246, 146, 30, 0.4);
 }
 
 .nav-badge-dot {
@@ -247,10 +247,10 @@
   right: 12px;
   width: 8px;
   height: 8px;
-  background: #F9A826;
+  background: #F6921E;
   border-radius: 50%;
-  border: 2px solid #0095D5;
-  box-shadow: 0 0 8px rgba(249, 168, 38, 0.6);
+  border: 2px solid #1B75BB;
+  box-shadow: 0 0 8px rgba(246, 146, 30, 0.6);
 }
 
 /* Sidebar Footer */

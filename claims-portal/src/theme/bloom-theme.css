@@ -3,47 +3,53 @@
  */
 
 :root {
-  /* Primary Brand Colors */
-  --bloom-blue: #0095D5;
-  --bloom-blue-dark: #0077AA;
-  --bloom-blue-light: #33AAE0;
+  /* Official Bloom Brand Colors */
+  --bloom-blue: #1B75BB;
+  --bloom-blue-dark: #155A93;
+  --bloom-blue-light: #00ADEE;
 
-  --bloom-green: #6CB33F;
-  --bloom-green-dark: #5A9933;
-  --bloom-green-light: #89C541;
+  --bloom-green: #37A526;
+  --bloom-green-dark: #2B8020;
+  --bloom-green-light: #8BC53F;
 
-  --bloom-orange: #F9A826;
-  --bloom-orange-dark: #E89410;
-  --bloom-orange-light: #FFBD4D;
+  --bloom-orange: #F6921E;
+  --bloom-orange-dark: #D67810;
+  --bloom-orange-light: #FFB347;
 
-  --bloom-lime: #C8D82D;
-  --bloom-lime-dark: #A8B824;
-  --bloom-lime-light: #D6E350;
+  --bloom-yellow: #E8DE23;
+  --bloom-yellow-dark: #C9BF1F;
+  --bloom-yellow-light: #F5F08A;
 
   /* Neutral Colors */
-  --bloom-gray: #707070;
+  --bloom-gray: #808285;
   --bloom-gray-dark: #4A4A4A;
-  --bloom-gray-light: #9E9E9E;
+  --bloom-gray-light: #C4C4C4;
 
   --bloom-white: #FFFFFF;
-  --bloom-off-white: #F8F9FA;
-  --bloom-light-bg: #F5F7FA;
+  --bloom-off-white: #F2F7F6;
+  --bloom-light-bg: #F2F7F6;
+  --bloom-pale-aqua: #F2F7F6;
 
   /* Semantic Colors */
-  --bloom-success: #6CB33F;
-  --bloom-warning: #F9A826;
-  --bloom-error: #E74C3C;
-  --bloom-info: #0095D5;
+  --bloom-red: #D02E2E;
+  --bloom-black: #000000;
+
+  /* Semantic Color Mapping */
+  --bloom-success: #37A526;
+  --bloom-warning: #F6921E;
+  --bloom-error: #D02E2E;
+  --bloom-info: #1B75BB;
 
   /* Gradients */
-  --bloom-gradient-primary: linear-gradient(135deg, #0095D5 0%, #6CB33F 100%);
-  --bloom-gradient-accent: linear-gradient(135deg, #F9A826 0%, #C8D82D 100%);
-  --bloom-gradient-subtle: linear-gradient(180deg, #F8F9FA 0%, #FFFFFF 100%);
+  --bloom-gradient-primary: linear-gradient(135deg, #1B75BB 0%, #00ADEE 100%);
+  --bloom-gradient-accent: linear-gradient(135deg, #F6921E 0%, #E8DE23 100%);
+  --bloom-gradient-green: linear-gradient(135deg, #37A526 0%, #8BC53F 100%);
+  --bloom-gradient-subtle: linear-gradient(180deg, #F2F7F6 0%, #FFFFFF 100%);
 
   /* Shadows */
-  --bloom-shadow-sm: 0 1px 3px rgba(0, 149, 213, 0.1);
-  --bloom-shadow-md: 0 4px 6px rgba(0, 149, 213, 0.15);
-  --bloom-shadow-lg: 0 10px 20px rgba(0, 149, 213, 0.2);
+  --bloom-shadow-sm: 0 1px 3px rgba(27, 117, 187, 0.1);
+  --bloom-shadow-md: 0 4px 6px rgba(27, 117, 187, 0.15);
+  --bloom-shadow-lg: 0 10px 20px rgba(27, 117, 187, 0.2);
 
   /* Border Radius */
   --bloom-radius-sm: 4px;
