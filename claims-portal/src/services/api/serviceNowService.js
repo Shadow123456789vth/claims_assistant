@@ -17,9 +17,12 @@ class ServiceNowService {
     this.baseURL = isDevelopment
       ? '/servicenow-api'  // Vite proxy path
       : this.serviceNowURL;
+
+    // ALWAYS use backend API for OAuth to avoid CORS issues
     this.oauthURL = isDevelopment
       ? '/servicenow-oauth'  // Vite proxy path for OAuth
-      : (this.serviceNowURL + '/oauth_token.do');
+      : '/api/servicenow-oauth';  // Backend API endpoint in production
+
     this.apiVersion = '/api/now/table';
     this.fnolTable = 'x_dxcis_claims_a_0_claims_fnol';
 

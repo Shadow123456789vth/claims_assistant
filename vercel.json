@@ -1,4 +1,10 @@
 {
   "buildCommand": "cd claims-portal && npm run build",
-  "installCommand": "cd claims-portal && npm install"
+  "installCommand": "cd claims-portal && npm install",
+  "rewrites": [
+    {
+      "source": "/api/servicenow-oauth",
+      "destination": "/claims-portal/api/servicenow-oauth"
+    }
+  ]
 }

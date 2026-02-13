@@ -3,40 +3,76 @@ export const config = {
 };
 
 export default async function handler(req, res) {
+  console.log('[API] ServiceNow OAuth - Incoming method:', req.method);
+  console.log('[API] Request headers:', req.headers);
 
-  console.log("Incoming method:", req.method);
+  // Set CORS headers for all responses
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Allow preflight
+  // Handle preflight
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).end();
   }
 
+  // Only allow POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   try {
+    // Parse the request body
+    let bodyParams;
 
-    // Accept body safely
-    const params = new URLSearchParams(req.body || {});
+    if (typeof req.body === 'string') {
+      // Body is already a string (form-urlencoded)
+      bodyParams = req.body;
+      console.log('[API] Body is string:', bodyParams);
+    } else if (req.body && typeof req.body === 'object') {
+      // Body is parsed as JSON, convert to URLSearchParams
+      const params = new URLSearchParams();
+      for (const [key, value] of Object.entries(req.body)) {
+        params.append(key, value);
+      }
+      bodyParams = params.toString();
+      console.log('[API] Body converted from object:', bodyParams);
+    } else {
+      throw new Error('Invalid request body');
+    }
 
-    const sn = await fetch(
+    console.log('[API] Forwarding OAuth request to ServiceNow...');
+
+    // Forward request to ServiceNow
+    const snResponse = await fetch(
       'https://nextgenbpmnp1.service-now.com/oauth_token.do',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: params.toString()
+        body: bodyParams
       }
     );
 
-    const text = await sn.text();
+    console.log('[API] ServiceNow response status:', snResponse.status);
 
-    return res.status(sn.status).send(text);
+    // Get response text
+    const responseText = await snResponse.text();
+    console.log('[API] ServiceNow response:', responseText);
+
+    // Set content type based on response
+    const contentType = snResponse.headers.get('content-type') || 'application/json';
+    res.setHeader('Content-Type', contentType);
+
+    // Return the ServiceNow response
+    return res.status(snResponse.status).send(responseText);
 
   } catch (err) {
+    console.error('[API] Error:', err);
     return res.status(500).json({
-      error: err.message
+      error: err.message,
+      details: 'Failed to proxy OAuth request to ServiceNow'
     });
   }
 }
