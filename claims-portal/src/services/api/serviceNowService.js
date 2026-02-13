@@ -698,8 +698,112 @@ class ServiceNowService {
   }
 
   /**
+   * Get policy details by sys_id
+   * @param {string} policySysId - ServiceNow sys_id of the policy record
+   * @param {string} policyTable - Policy table name (default: 'x_dxcis_claims_a_0_policy')
+   * @returns {Promise<Object>} Policy record
+   */
+  async getPolicyBySysId(policySysId, policyTable = 'x_dxcis_claims_a_0_policy') {
+    try {
+      const path = `${this.apiVersion}/${policyTable}/${policySysId}`;
+      const url = this.buildProxyURL(path);
+      console.log('[ServiceNow] Fetching policy for sys_id:', policySysId);
+
+      const headers = await this.getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'GET',
+        headers
+      });
+
+      if (!response.ok) {
+        throw new Error(`ServiceNow API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('[ServiceNow] Policy fetched successfully');
+      return data.result;
+    } catch (error) {
+      console.error('[ServiceNow] Error fetching policy:', error);
+      throw new Error(`Failed to fetch policy from ServiceNow: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get policy details by policy number
+   * @param {string} policyNumber - Policy number
+   * @param {string} policyTable - Policy table name (default: 'x_dxcis_claims_a_0_policy')
+   * @returns {Promise<Object>} Policy record
+   */
+  async getPolicyByNumber(policyNumber, policyTable = 'x_dxcis_claims_a_0_policy') {
+    try {
+      const params = new URLSearchParams({
+        sysparm_query: `policy_number=${policyNumber}`,
+        sysparm_limit: '1',
+        sysparm_display_value: 'true'
+      });
+      const path = `${this.apiVersion}/${policyTable}?${params}`;
+      const url = this.buildProxyURL(path);
+      console.log('[ServiceNow] Fetching policy by number:', policyNumber);
+
+      const headers = await this.getAuthHeaders();
+      const response = await fetch(url, {
+        method: 'GET',
+        headers
+      });
+
+      if (!response.ok) {
+        throw new Error(`ServiceNow API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.result && data.result.length > 0) {
+        console.log('[ServiceNow] Policy found:', data.result[0]);
+        return data.result[0];
+      }
+
+      throw new Error(`Policy not found: ${policyNumber}`);
+    } catch (error) {
+      console.error('[ServiceNow] Error fetching policy by number:', error);
+      throw new Error(`Failed to fetch policy from ServiceNow: ${error.message}`);
+    }
+  }
+
+  /**
+   * Enrich FNOL with full policy details
+   * Fetches policy data if FNOL contains policy sys_id reference
+   * @param {Object} fnol - FNOL record from ServiceNow
+   * @param {string} policyTable - Policy table name
+   * @returns {Promise<Object>} FNOL with enriched policy data
+   */
+  async enrichFNOLWithPolicy(fnol, policyTable = 'x_dxcis_claims_a_0_policy') {
+    try {
+      // Check if FNOL has policy reference (could be named differently)
+      const policySysId = fnol.policy?.value || fnol.policy_sys_id?.value || fnol.policy;
+
+      if (!policySysId || typeof policySysId !== 'string') {
+        console.log('[ServiceNow] No policy sys_id found in FNOL, using policy number only');
+        return fnol;
+      }
+
+      console.log('[ServiceNow] Enriching FNOL with policy details for sys_id:', policySysId);
+      const policyDetails = await this.getPolicyBySysId(policySysId, policyTable);
+
+      // Attach full policy details to FNOL
+      return {
+        ...fnol,
+        policy_details: policyDetails
+      };
+    } catch (error) {
+      console.warn('[ServiceNow] Could not enrich FNOL with policy details:', error.message);
+      // Return original FNOL if policy fetch fails
+      return fnol;
+    }
+  }
+
+  /**
    * Get all FNOL records from global domain
    * @param {Object} filters - Optional query filters
+   * @param {boolean} filters.enrichWithPolicy - Whether to enrich FNOLs with full policy details
    * @returns {Promise<Array>} Array of FNOL records
    */
   async getFNOLsGlobal(filters = {}) {
@@ -734,8 +838,19 @@ class ServiceNowService {
       }
 
       const data = await response.json();
-      console.log('[ServiceNow] Global FNOLs fetched:', data.result?.length || 0, 'records');
-      return data.result || [];
+      let fnols = data.result || [];
+      console.log('[ServiceNow] Global FNOLs fetched:', fnols.length, 'records');
+
+      // Optionally enrich with policy details
+      if (filters.enrichWithPolicy && fnols.length > 0) {
+        console.log('[ServiceNow] Enriching FNOLs with policy details...');
+        fnols = await Promise.all(
+          fnols.map(fnol => this.enrichFNOLWithPolicy(fnol, filters.policyTable))
+        );
+        console.log('[ServiceNow] FNOLs enriched with policy details');
+      }
+
+      return fnols;
     } catch (error) {
       console.error('[ServiceNow] Error fetching global FNOLs:', error);
       throw new Error(`Failed to fetch global FNOLs from ServiceNow: ${error.message}`);
@@ -803,7 +918,22 @@ class ServiceNowService {
           zipCode: fnol.claimant_zip_code || ''
         }
       },
-      policy: {
+      policy: fnol.policy_details ? {
+        // Full policy details from enriched data
+        policyNumber: fnol.policy_details.policy_number || fnol.policy_numbers || 'N/A',
+        policyType: fnol.policy_details.policy_type || 'Term Life Insurance',
+        policyStatus: fnol.policy_details.policy_status || '',
+        coverageAmount: fnol.policy_details.coverage_amount || fnol.policy_details.face_amount || 0,
+        effectiveDate: fnol.policy_details.effective_date || '',
+        issueDate: fnol.policy_details.issue_date || '',
+        expirationDate: fnol.policy_details.expiration_date || '',
+        premiumAmount: fnol.policy_details.premium_amount || 0,
+        beneficiaries: fnol.policy_details.beneficiaries || [],
+        riders: fnol.policy_details.riders || [],
+        // Include full raw policy data for reference
+        details: fnol.policy_details
+      } : {
+        // Fallback to basic policy info if not enriched
         policyNumber: fnol.policy_numbers || 'N/A',
         policyType: 'Term Life Insurance'
       },
