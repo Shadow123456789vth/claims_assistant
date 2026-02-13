@@ -109,15 +109,6 @@ const Sidebar = ({ currentView, onNavigationClick, collapsed = false, onToggleCo
             </div>
           )}
         </div>
-        <button
-          className="collapse-toggle"
-          onClick={handleToggle}
-          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          <span className="material-icons">
-            {isCollapsed ? 'chevron_right' : 'chevron_left'}
-          </span>
-        </button>
       </div>
 
       {/* Navigation Groups */}
